@@ -1,3 +1,24 @@
+# Dataset (trop lourd pour git)
 ml-32m/
 *.zip
-*.csv
+
+# Fichiers générés par Spark
+derby.log
+metastore_db/
+spark-warehouse/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
