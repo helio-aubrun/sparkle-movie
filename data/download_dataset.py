@@ -7,8 +7,8 @@ import zipfile
 import os
 
 URL      = "https://files.grouplens.org/datasets/movielens/ml-32m.zip"
-ZIP_PATH = "ml-32m.zip"
-OUT_DIR  = "ml-32m"
+ZIP_PATH = "../ml-32m.zip"
+OUT_DIR  = "../ml-32m"
 
 if os.path.exists(OUT_DIR):
     print(f"Dataset deja present dans '{OUT_DIR}/'")
