@@ -20,8 +20,7 @@ sparkle-movie/
 ├── data/
 │   └── download_dataset.py      # Script de téléchargement du dataset MovieLens 32M
 ├── notebooks/
-│   ├── 01_exploration.ipynb     # Analyse exploratoire des données (EDA)
-│   └── 02_modelisation.ipynb    # Modélisation : ALS, Content-Based, KNN
+│   └── 01_exploration.ipynb     # Exploration, modélisation (ALS, Content-Based, KNN) et évaluation
 ├── src/                         # Scripts Python d'entraînement et de nettoyage
 ├── api/                         # API REST FastAPI
 ├── tests/                       # Tests automatisés Pytest
@@ -70,35 +69,66 @@ python data/download_dataset.py
 
 Algorithme natif de **Spark MLlib** qui décompose la matrice utilisateurs × films en deux matrices de facteurs latents. Il prédit les notes manquantes en exploitant les similarités de comportement entre utilisateurs.
 
-**Hyperparamètres ajustés :**
-- `rank` : dimension des vecteurs de facteurs latents
+**Hyperparamètres :**
+- `rank` : dimension des vecteurs de facteurs latents (défaut : 10)
 - `regParam` : régularisation pour éviter l'overfitting
 - `maxIter` : nombre d'itérations
+- `coldStartStrategy="drop"` : ignore les IDs inconnus lors de l'évaluation
 
-**Évaluation :** RMSE (Root Mean Square Error)
+**Résultats :**
+- RMSE = **0.8098** sur le jeu de test (split 80/20)
+- Couverture du catalogue = **0.93%** (ALS se concentre sur les films populaires)
 
 **Avantages :** Scalable, natif Spark, très performant sur des données denses
-**Limites :** Aveugle sur les films froids (< 5 notes)
+**Limites :** Couverture faible — aveugle sur les films peu notés
 
 ---
 
 ### 2. Content-Based Filtering
 
-Crée des profils de films à partir de leurs genres, puis recommande des films similaires à ceux qu'un utilisateur a aimés. Utilise :
-- **TF-IDF** pour vectoriser les genres
-- **Similarité cosinus** pour mesurer la proximité entre films
+Crée des profils de films à partir de leurs genres, puis recommande des films similaires à ceux qu'un utilisateur a aimés.
+
+**Pipeline :**
+1. One-Hot Encoding manuel des genres (20 genres uniques)
+2. **HashingTF** → conversion de la liste de genres en fréquences
+3. **IDF** → pondération de l'importance relative de chaque genre
+4. **Normalizer** → normalisation pour la similarité cosinus
+5. **Similarité cosinus** → mesure de proximité entre films via produit scalaire
 
 **Avantages :** Résout le cold start côté films, indépendant des notes
 **Limites :** Limité aux genres disponibles, ne découvre pas de nouveaux profils
 
 ---
 
-### 3. KNN — K-Nearest Neighbors
+### 3. KNN — K-Nearest Neighbors (User-User Collaborative Filtering)
 
-Trouve les K utilisateurs dont le profil de notes est le plus proche de l'utilisateur cible, puis recommande les films bien notés par ces voisins.
+Trouve les K utilisateurs dont le profil est le plus proche de l'utilisateur cible, puis recommande les films bien notés (≥ 4) par ces voisins.
 
-**Avantages :** Intuitif, efficace pour les utilisateurs avec peu d'historique
-**Limites :** Coûteux à l'échelle, sensible aux outliers
+Deux implémentations comparées :
+
+| Méthode | Complexité requête | Exact ? | Implémentation |
+|---------|-------------------|---------|----------------|
+| **LSH** (BucketedRandomProjection) | O(1) approx. | ❌ | Spark MLlib natif |
+| **KD-Tree** | O(k · log n) | ✅ | scikit-learn (driver) |
+
+> Le KD-Tree est optimal avec `rank=10` (faible dimension). Au-delà de rank ≈ 50, la malédiction de la dimensionnalité dégrade l'avantage logarithmique.
+
+**Avantages :** Intuitif, exact avec KD-Tree, exploite les vecteurs latents ALS
+**Limites :** KD-Tree limité à ~1M utilisateurs, LSH approximatif
+
+---
+
+## Évaluation comparative
+
+Recommandations générées pour 5 utilisateurs fictifs (IDs : 1, 10, 500, 2000, 5000) :
+
+| Approche | Précision (RMSE) | Couverture | Points forts |
+|----------|-----------------|------------|--------------|
+| **ALS** | 0.8098 | 0.93% | Personnalisation fine sur historique riche |
+| **Content-Based** | N/A | ~100% | Couvre les films froids, indépendant des notes |
+| **KNN (KD-Tree)** | N/A | Dépend des voisins | Exact, exploite les vecteurs ALS |
+
+**Conclusion :** Aucune approche seule ne suffit. Un système hybride ALS + Content-Based offre la meilleure couverture du catalogue (réponse au cold start) tout en maintenant une précision élevée sur les utilisateurs actifs.
 
 ---
 
@@ -115,7 +145,7 @@ Trouve les K utilisateurs dont le profil de notes est le plus proche de l'utilis
 | Précision | Bonne sur données denses | Meilleure sur données riches |
 | Temps d'entraînement | Rapide | Long |
 
-**Choix retenu : ALS** — justifié par la taille du dataset (32M lignes), l'absence de GPU, et l'intégration native dans l'écosystème Spark déjà utilisé.
+**Choix retenu : ALS** — justifié par la taille du dataset (32M lignes), l'absence de GPU, et l'intégration native dans l'écosystème Spark.
 
 ### Pourquoi Apache Spark ?
 
@@ -123,7 +153,7 @@ Sur 32 millions de notes, les alternatives présentent des limitations critiques
 
 | Outil | Limite |
 |-------|--------|
-| Pandas | Charge le dataset en RAM — crash ou swap sur une machine standard |
+| Pandas | Charge le dataset en RAM — crash sur machine standard |
 | Scikit-learn | Mono-thread, pas conçu pour du distribué |
 | SQL classique | Pas de MLlib, pas de traitement distribué natif |
 | **Spark** | Distribué, MLlib intégré, traitement en mémoire partitionné |
@@ -132,7 +162,7 @@ Sur 32 millions de notes, les alternatives présentent des limitations critiques
 
 Le dataset MovieLens est **anonymisé** : les `userId` sont des identifiants numériques sans lien avec des données personnelles réelles. Toutefois, en contexte de production réelle :
 
-- Les recommandations personnalisées constituent un **traitement de données à caractère personnel** au sens de l'article 4 du RGPD
+- Les recommandations personnalisées constituent un **traitement de données à caractère personnel** (article 4 RGPD)
 - L'utilisateur doit être informé de l'usage de ses données (article 13)
 - Un droit d'opposition au profilage doit être prévu (article 21)
 - Les modèles entraînés sur des données utilisateurs doivent être supprimables sur demande (**droit à l'oubli**, article 17)
@@ -210,7 +240,7 @@ pytest tests/ -v
 
 Les tests couvrent :
 - Validation des types de données en entrée
-- Vérification que le RMSE reste sous le seuil défini
+- Vérification que le RMSE reste sous le seuil défini (< 1.0)
 - Tests de l'API (statut, format de réponse)
 
 ---
@@ -222,19 +252,7 @@ Le système de logging enregistre :
 - Les temps de réponse de l'API
 
 **Stratégie de détection du Data Drift :**
-La distribution des notes et la popularité des genres sont mesurées périodiquement. Un écart significatif par rapport aux statistiques d'entraînement (distribution des notes, médiane des votes par film) déclenche un réentraînement du modèle.
-
----
-
-## Conclusion
-
-Les trois approches se complètent :
-
-- **ALS** couvre efficacement les 200 948 utilisateurs avec un historique riche
-- **Content-Based** résout le cold start pour les 48% de films peu notés
-- **KNN** affine les recommandations pour les profils atypiques
-
-L'évaluation comparative (RMSE, précision, couverture) démontre qu'aucune approche seule ne suffit : un système hybride combinant ALS et Content-Based offre la meilleure couverture du catalogue tout en maintenant une précision élevée.
+La distribution des notes et la popularité des genres sont mesurées périodiquement. Un écart significatif par rapport aux statistiques d'entraînement déclenche un réentraînement du modèle.
 
 ---
 
