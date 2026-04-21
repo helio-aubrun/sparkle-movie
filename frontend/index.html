@@ -186,37 +186,41 @@
 <div id="page-dashboard" class="page active">
   <div class="stat-grid">
     <div class="stat-card"><div class="stat-label">Notes</div><div class="stat-value accent">32M</div><div class="stat-sub">MovieLens 32M dataset</div></div>
-    <div class="stat-card"><div class="stat-label">Films</div><div class="stat-value">87 585</div><div class="stat-sub">titres uniques</div></div>
-    <div class="stat-card"><div class="stat-label">Utilisateurs</div><div class="stat-value">200 948</div><div class="stat-sub">profils actifs</div></div>
+    <div class="stat-card"><div class="stat-label">Films populaires</div><div class="stat-value">16 034</div><div class="stat-sub">≥ 50 notes · filtre popularité</div></div>
+    <div class="stat-card"><div class="stat-label">Utilisateurs</div><div class="stat-value">200 947</div><div class="stat-sub">profils actifs</div></div>
     <div class="stat-card"><div class="stat-label">RMSE</div><div class="stat-value success" id="rmse-val">—</div><div class="stat-sub">Root Mean Square Error</div></div>
-    <div class="stat-card"><div class="stat-label">Couverture</div><div class="stat-value warn" id="cov-val">—</div><div class="stat-sub">% du catalogue couvert</div></div>
+    <div class="stat-card"><div class="stat-label">Couverture</div><div class="stat-value warn" id="cov-val">—</div><div class="stat-sub">films distincts recommandés</div></div>
+    <div class="stat-card"><div class="stat-label">Films couverts</div><div class="stat-value accent" id="films-distincts-val">—</div><div class="stat-sub">titres distincts recommandés</div></div>
   </div>
 
   <div class="section-title">Comparaison des 3 approches <span>Évaluation sur MovieLens 32M</span></div>
   <table class="cmp-table">
-    <thead><tr><th>Algorithme</th><th>Méthode</th><th>RMSE</th><th>Couverture</th><th>Cold Start films</th><th>Scalabilité</th></tr></thead>
+    <thead><tr><th>Algorithme</th><th>Méthode</th><th>RMSE</th><th>Couverture</th><th>Personnalisation</th><th>Cold Start films</th><th>Scalabilité</th></tr></thead>
     <tbody>
       <tr>
         <td><span class="badge badge-als">ALS</span></td>
-        <td>Collaborative Filtering — décomposition matricielle (Spark MLlib)</td>
-        <td><span class="score-pill" id="tbl-rmse">0.81</span></td>
-        <td><span style="color:var(--warn)">0.91%</span></td>
+        <td>Collaborative Filtering — décomposition matricielle (Spark MLlib)<br><small style="color:var(--muted)">nonneg=False · regParam=0.1 · filtre ≥50 notes</small></td>
+        <td><span class="score-pill" id="tbl-rmse">—</span></td>
+        <td><span style="color:var(--warn)" id="tbl-cov">2.64%</span></td>
+        <td><span style="color:var(--success)">2 309 films distincts</span></td>
         <td><span style="color:var(--danger)">Non résolu</span></td>
         <td><span style="color:var(--success)">Excellente</span></td>
       </tr>
       <tr>
         <td><span class="badge badge-cb">Content-Based</span></td>
-        <td>TF-IDF sur les genres + Similarité cosinus</td>
+        <td>TF-IDF sur les genres + Similarité cosinus<br><small style="color:var(--muted)">87 585 films indexés au démarrage de l'API</small></td>
         <td><span style="color:var(--muted)">N/A</span></td>
         <td><span style="color:var(--success)">~100%</span></td>
+        <td><span style="color:var(--success)">Catalogue complet</span></td>
         <td><span style="color:var(--success)">Résolu</span></td>
         <td><span style="color:var(--success)">Bonne</span></td>
       </tr>
       <tr>
         <td><span class="badge badge-knn">KNN</span></td>
-        <td>User-User CF — similarité cosinus sur profils genre</td>
+        <td>User-User CF — similarité cosinus sur profils genre<br><small style="color:var(--muted)">Proxy sur les recommandations ALS agrégées</small></td>
         <td><span style="color:var(--muted)">N/A</span></td>
         <td><span style="color:var(--warn)">Variable</span></td>
+        <td><span style="color:var(--warn)">Films de niche</span></td>
         <td><span style="color:var(--warn)">Partiel</span></td>
         <td><span style="color:var(--warn)">Raisonnable</span></td>
       </tr>
@@ -225,10 +229,10 @@
 
   <div class="conclusion-box">
     <h3>Conclusion — Quelle approche choisir ?</h3>
-    <p><strong style="color:var(--text)">ALS</strong> est l'algorithme le plus précis (RMSE = 0.81) sur les utilisateurs actifs, mais sa couverture catalogue est limitée à 0.91% — il ne recommande que les films populaires.</p>
-    <p><strong style="color:var(--text)">Content-Based</strong> résout le problème de cold start pour les films peu notés (48% du catalogue) en se basant uniquement sur les genres. Il est indispensable en complément d'ALS.</p>
-    <p><strong style="color:var(--text)">KNN</strong> exploite les profils genre pour trouver des utilisateurs similaires. Il produit des recommandations variées et complémentaires.</p>
-    <p>→ <strong style="color:var(--accent2)">Système hybride recommandé : ALS + Content-Based</strong>, le KNN venant enrichir les profils avec des découvertes inattendues.</p>
+    <p><strong style="color:var(--text)">ALS</strong> offre le meilleur RMSE (0.8003) et une vraie personnalisation : chaque utilisateur reçoit des recommandations différentes issues de 2 309 films distincts. Ce résultat a nécessité un calibrage fin des hyperparamètres — supprimer <code style="color:var(--accent2)">nonnegative=True</code> (qui forçait 38 mêmes films pour tous) et filtrer les films à moins de 50 notes (qui introduisaient du bruit).</p>
+    <p><strong style="color:var(--text)">Content-Based</strong> résout le cold start en se basant uniquement sur les genres (TF-IDF sur 87 585 films). Il est indispensable pour les nouveaux utilisateurs et les films peu notés qui échappent à ALS.</p>
+    <p><strong style="color:var(--text)">KNN</strong> exploite les profils genre pour trouver des utilisateurs similaires. Il produit des recommandations de niche complémentaires à l'ALS.</p>
+    <p>→ <strong style="color:var(--accent2)">Système hybride recommandé : ALS + Content-Based</strong>, le KNN enrichissant les profils avec des découvertes inattendues.</p>
   </div>
 </div>
 
@@ -436,6 +440,14 @@
       document.getElementById('rmse-val').textContent = data.rmse?.toFixed(4) ?? '—';
       document.getElementById('cov-val').textContent  = (data.coverage_pct?.toFixed(2) ?? '—') + '%';
       document.getElementById('tbl-rmse').textContent = data.rmse?.toFixed(4) ?? '—';
+      if (data.coverage_pct != null) {
+        document.getElementById('tbl-cov').textContent = data.coverage_pct.toFixed(2) + '%';
+      }
+      // Films distincts = coverage_pct/100 * n_movies
+      if (data.coverage_pct != null && data.n_movies != null) {
+        const distincts = Math.round(data.coverage_pct / 100 * data.n_movies);
+        document.getElementById('films-distincts-val').textContent = distincts.toLocaleString('fr-FR');
+      }
     } catch(e) {}
   }
 
