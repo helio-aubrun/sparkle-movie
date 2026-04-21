@@ -67,8 +67,8 @@ als = ALS(
     ratingCol="rating",
     rank=10,
     maxIter=10,
-    regParam=0.3,          # augmenté de 0.1 → 0.3 pour réduire l'overfitting sur films rares
-    nonnegative=True,
+    regParam=0.1,
+    nonnegative=False,     # facteurs négatifs autorisés → vraie personnalisation
     implicitPrefs=False,
     coldStartStrategy="drop",
 )
@@ -123,7 +123,7 @@ metrics = {
     "n_movies":          int(total_movies),
     "n_popular_films":   int(n_popular),
     "min_ratings_filter": MIN_RATINGS_FILM,
-    "reg_param":         0.3,
+    "reg_param":         0.1,
     "n_recommendations": len(recs_pd),
     "trained_at":        datetime.datetime.now().isoformat(),
 }

@@ -160,4 +160,4 @@ os.makedirs("data", exist_ok=True)
 with open("data/profiles.json", "w", encoding="utf-8") as f:
     json.dump({"users": profiles}, f, ensure_ascii=False, indent=2)
 
-print("\nProfils exportés → data/profiles.json")
+print("\nProfils exportes : data/profiles.json")
