@@ -99,8 +99,8 @@ recs_flat = (
         F.col("rec.movieId").alias("movieId"),
         F.col("rec.rating").alias("score"),
     )
-    # Exclure les scores > 5 (artifacts du modèle sur données sparse)
-    .filter(F.col("score") <= 5.0)
+    # Plafonner les scores à 5.0 (artifacts du modèle sur données sparse)
+    .withColumn("score", F.least(F.col("score"), F.lit(5.0)))
     .join(df_movies.select("movieId", "title", "genres"), on="movieId", how="left")
     .select("userId", "rank", "movieId", "title", "genres", "score")
     .orderBy("userId", "rank")
@@ -109,7 +109,7 @@ recs_flat = (
 os.makedirs("data", exist_ok=True)
 recs_pd = recs_flat.toPandas()
 recs_pd.to_csv(OUTPUT_RECS, index=False)
-print(f"Recommandations exportées → {OUTPUT_RECS} ({len(recs_pd):,} lignes)")
+print(f"Recommandations exportees : {OUTPUT_RECS} ({len(recs_pd):,} lignes)")
 
 # ── Export des métriques ──────────────────────────────────────────────────────
 recommended_movies = recs_flat.select("movieId").distinct().count()
@@ -129,7 +129,7 @@ metrics = {
 }
 with open(OUTPUT_METRICS, "w") as f:
     json.dump(metrics, f, indent=2)
-print(f"Métriques exportées → {OUTPUT_METRICS}")
+print(f"Metriques exportees : {OUTPUT_METRICS}")
 print(json.dumps(metrics, indent=2))
 
 spark.stop()
