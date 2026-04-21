@@ -1,0 +1,1244 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Akram",
+      "n_rated": 141,
+      "favorite_genres": [
+        "Drama",
+        "Comedy",
+        "Romance"
+      ],
+      "history": [
+        {
+          "movieId": 30,
+          "title": "Shanghai Triad (Yao a yao yao dao waipo qiao) (1995)",
+          "genres": "Crime|Drama",
+          "rating": 5.0
+        },
+        {
+          "movieId": 32,
+          "title": "Twelve Monkeys (a.k.a. 12 Monkeys) (1995)",
+          "genres": "Mystery|Sci-Fi|Thriller",
+          "rating": 5.0
+        },
+        {
+          "movieId": 80,
+          "title": "White Balloon, The (Badkonake sefid) (1995)",
+          "genres": "Children|Drama",
+          "rating": 5.0
+        },
+        {
+          "movieId": 111,
+          "title": "Taxi Driver (1976)",
+          "genres": "Crime|Drama|Thriller",
+          "rating": 5.0
+        },
+        {
+          "movieId": 166,
+          "title": "Doom Generation, The (1995)",
+          "genres": "Comedy|Crime|Drama",
+          "rating": 5.0
+        }
+      ],
+      "als": [
+        {
+          "rank": 1,
+          "movieId": 270306,
+          "title": "WWE: The Triumph and Tragedy of World Class Championship Wrestling (2007)",
+          "genres": "Action|Documentary",
+          "score": 5.7547
+        },
+        {
+          "rank": 2,
+          "movieId": 240070,
+          "title": "SpongeBob SquarePants: Heroes of Bikini Bottom (2011)",
+          "genres": "Animation",
+          "score": 5.7547
+        },
+        {
+          "rank": 3,
+          "movieId": 240054,
+          "title": "SpongeBob SquarePants: Tide and Seek",
+          "genres": "Animation|Comedy",
+          "score": 5.7547
+        },
+        {
+          "rank": 4,
+          "movieId": 194434,
+          "title": "Adrenaline (1990)",
+          "genres": "(no genres listed)",
+          "score": 5.5183
+        },
+        {
+          "rank": 5,
+          "movieId": 216753,
+          "title": "Speed Demon (2003)",
+          "genres": "Action|Horror|Thriller",
+          "score": 5.3123
+        },
+        {
+          "rank": 6,
+          "movieId": 227066,
+          "title": "Friendly Fire (2006)",
+          "genres": "Drama",
+          "score": 5.2122
+        },
+        {
+          "rank": 7,
+          "movieId": 263389,
+          "title": "The Snow Goose (1971)",
+          "genres": "Children|Drama|Romance|War",
+          "score": 5.1468
+        },
+        {
+          "rank": 8,
+          "movieId": 256477,
+          "title": "Justice League: Secret Origins (2001)",
+          "genres": "Action|Adventure|Animation|Sci-Fi",
+          "score": 5.1414
+        },
+        {
+          "rank": 9,
+          "movieId": 177209,
+          "title": "Acı Aşk (2009)",
+          "genres": "Drama",
+          "score": 5.1264
+        },
+        {
+          "rank": 10,
+          "movieId": 151989,
+          "title": "The Thorn (1971)",
+          "genres": "Comedy",
+          "score": 5.1253
+        }
+      ],
+      "content_based": [
+        {
+          "movieId": 154154,
+          "title": "Shor in the City (2011)",
+          "genres": "Crime|Drama",
+          "score": 1.0
+        },
+        {
+          "movieId": 152719,
+          "title": "Las Poquianchis (1976)",
+          "genres": "Crime|Drama",
+          "score": 1.0
+        },
+        {
+          "movieId": 269220,
+          "title": "How I Fell in Love with a Gangster (2022)",
+          "genres": "Crime|Drama",
+          "score": 1.0
+        },
+        {
+          "movieId": 124502,
+          "title": "Have I the Right To Kill (1964)",
+          "genres": "Crime|Drama",
+          "score": 1.0
+        },
+        {
+          "movieId": 110190,
+          "title": "Blondie Johnson (1933)",
+          "genres": "Crime|Drama",
+          "score": 1.0
+        },
+        {
+          "movieId": 110235,
+          "title": "Our Paradise (Notre paradis) (2011)",
+          "genres": "Crime|Drama",
+          "score": 1.0
+        },
+        {
+          "movieId": 221192,
+          "title": "Savage Youth (2018)",
+          "genres": "Crime|Drama",
+          "score": 1.0
+        },
+        {
+          "movieId": 170481,
+          "title": "The Most Hated Woman in America (2017)",
+          "genres": "Crime|Drama",
+          "score": 1.0
+        },
+        {
+          "movieId": 188649,
+          "title": "My Name Ain't Johnny (2008)",
+          "genres": "Crime|Drama",
+          "score": 1.0
+        },
+        {
+          "movieId": 202497,
+          "title": "Les Misérables (2019)",
+          "genres": "Crime|Drama",
+          "score": 1.0
+        }
+      ],
+      "knn": [
+        {
+          "movieId": 296,
+          "title": "Pulp Fiction (1994)",
+          "genres": "Comedy|Crime|Drama|Thriller",
+          "score": 4.5,
+          "votes": 13
+        },
+        {
+          "movieId": 750,
+          "title": "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1964)",
+          "genres": "Comedy|War",
+          "score": 4.7083,
+          "votes": 12
+        },
+        {
+          "movieId": 318,
+          "title": "Shawshank Redemption, The (1994)",
+          "genres": "Crime|Drama",
+          "score": 4.5833,
+          "votes": 12
+        },
+        {
+          "movieId": 50,
+          "title": "Usual Suspects, The (1995)",
+          "genres": "Crime|Mystery|Thriller",
+          "score": 4.4583,
+          "votes": 12
+        },
+        {
+          "movieId": 2858,
+          "title": "American Beauty (1999)",
+          "genres": "Drama|Romance",
+          "score": 4.4583,
+          "votes": 12
+        },
+        {
+          "movieId": 1193,
+          "title": "One Flew Over the Cuckoo's Nest (1975)",
+          "genres": "Drama",
+          "score": 4.4167,
+          "votes": 12
+        },
+        {
+          "movieId": 1097,
+          "title": "E.T. the Extra-Terrestrial (1982)",
+          "genres": "Children|Drama|Sci-Fi",
+          "score": 4.6364,
+          "votes": 11
+        },
+        {
+          "movieId": 1206,
+          "title": "Clockwork Orange, A (1971)",
+          "genres": "Crime|Drama|Sci-Fi|Thriller",
+          "score": 4.5909,
+          "votes": 11
+        },
+        {
+          "movieId": 919,
+          "title": "Wizard of Oz, The (1939)",
+          "genres": "Adventure|Children|Fantasy|Musical",
+          "score": 4.3636,
+          "votes": 11
+        },
+        {
+          "movieId": 3114,
+          "title": "Toy Story 2 (1999)",
+          "genres": "Adventure|Animation|Children|Comedy|Fantasy",
+          "score": 4.3636,
+          "votes": 11
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Giuliana",
+      "n_rated": 660,
+      "favorite_genres": [
+        "Action",
+        "Thriller",
+        "Adventure"
+      ],
+      "history": [
+        {
+          "movieId": 593,
+          "title": "Silence of the Lambs, The (1991)",
+          "genres": "Crime|Horror|Thriller",
+          "rating": 5.0
+        },
+        {
+          "movieId": 858,
+          "title": "Godfather, The (1972)",
+          "genres": "Crime|Drama",
+          "rating": 5.0
+        },
+        {
+          "movieId": 296,
+          "title": "Pulp Fiction (1994)",
+          "genres": "Comedy|Crime|Drama|Thriller",
+          "rating": 4.5
+        },
+        {
+          "movieId": 733,
+          "title": "Rock, The (1996)",
+          "genres": "Action|Adventure|Thriller",
+          "rating": 4.5
+        },
+        {
+          "movieId": 1196,
+          "title": "Star Wars: Episode V - The Empire Strikes Back (1980)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "rating": 4.5
+        }
+      ],
+      "als": [
+        {
+          "rank": 1,
+          "movieId": 270306,
+          "title": "WWE: The Triumph and Tragedy of World Class Championship Wrestling (2007)",
+          "genres": "Action|Documentary",
+          "score": 5.2013
+        },
+        {
+          "rank": 2,
+          "movieId": 240070,
+          "title": "SpongeBob SquarePants: Heroes of Bikini Bottom (2011)",
+          "genres": "Animation",
+          "score": 5.2013
+        },
+        {
+          "rank": 3,
+          "movieId": 240054,
+          "title": "SpongeBob SquarePants: Tide and Seek",
+          "genres": "Animation|Comedy",
+          "score": 5.2013
+        },
+        {
+          "rank": 4,
+          "movieId": 177209,
+          "title": "Acı Aşk (2009)",
+          "genres": "Drama",
+          "score": 5.0691
+        },
+        {
+          "rank": 5,
+          "movieId": 194434,
+          "title": "Adrenaline (1990)",
+          "genres": "(no genres listed)",
+          "score": 4.9202
+        },
+        {
+          "rank": 6,
+          "movieId": 275847,
+          "title": "Beyond Words (2018)",
+          "genres": "Drama",
+          "score": 4.9016
+        },
+        {
+          "rank": 7,
+          "movieId": 161119,
+          "title": "Tale About the Cat and the Moon (1997)",
+          "genres": "Animation",
+          "score": 4.8934
+        },
+        {
+          "rank": 8,
+          "movieId": 151989,
+          "title": "The Thorn (1971)",
+          "genres": "Comedy",
+          "score": 4.8396
+        },
+        {
+          "rank": 9,
+          "movieId": 222368,
+          "title": "Crazy Romance (2019)",
+          "genres": "Comedy|Romance",
+          "score": 4.7236
+        },
+        {
+          "rank": 10,
+          "movieId": 231289,
+          "title": "LIFE BEYOND: Chapter 2. The Museum of Alien Life (2020)",
+          "genres": "Documentary",
+          "score": 4.6184
+        }
+      ],
+      "content_based": [
+        {
+          "movieId": 256371,
+          "title": "Therapy (2016)",
+          "genres": "Crime|Horror|Thriller",
+          "score": 1.0
+        },
+        {
+          "movieId": 146054,
+          "title": "Death Valley (1982)",
+          "genres": "Crime|Horror|Thriller",
+          "score": 1.0
+        },
+        {
+          "movieId": 280566,
+          "title": "Frank and Penelope (2022)",
+          "genres": "Crime|Horror|Thriller",
+          "score": 1.0
+        },
+        {
+          "movieId": 155350,
+          "title": "Where the Truth Lies (1962)",
+          "genres": "Crime|Horror|Thriller",
+          "score": 1.0
+        },
+        {
+          "movieId": 199490,
+          "title": "The Banker (1989)",
+          "genres": "Crime|Horror|Thriller",
+          "score": 1.0
+        },
+        {
+          "movieId": 163711,
+          "title": "Haunted (2007)",
+          "genres": "Crime|Horror|Thriller",
+          "score": 1.0
+        },
+        {
+          "movieId": 161436,
+          "title": "The Puzzle of the Red Orchid (1962)",
+          "genres": "Crime|Horror|Thriller",
+          "score": 1.0
+        },
+        {
+          "movieId": 220416,
+          "title": "Hunter's Moon (2020)",
+          "genres": "Crime|Horror|Thriller",
+          "score": 1.0
+        },
+        {
+          "movieId": 237916,
+          "title": "Double Exposure (1982)",
+          "genres": "Crime|Horror|Thriller",
+          "score": 1.0
+        },
+        {
+          "movieId": 4645,
+          "title": "Cure (1997)",
+          "genres": "Crime|Horror|Thriller",
+          "score": 1.0
+        }
+      ],
+      "knn": [
+        {
+          "movieId": 1704,
+          "title": "Good Will Hunting (1997)",
+          "genres": "Drama|Romance",
+          "score": 4.6818,
+          "votes": 11
+        },
+        {
+          "movieId": 1222,
+          "title": "Full Metal Jacket (1987)",
+          "genres": "Drama|War",
+          "score": 4.55,
+          "votes": 10
+        },
+        {
+          "movieId": 2858,
+          "title": "American Beauty (1999)",
+          "genres": "Drama|Romance",
+          "score": 4.55,
+          "votes": 10
+        },
+        {
+          "movieId": 7361,
+          "title": "Eternal Sunshine of the Spotless Mind (2004)",
+          "genres": "Drama|Romance|Sci-Fi",
+          "score": 4.55,
+          "votes": 10
+        },
+        {
+          "movieId": 1201,
+          "title": "Good, the Bad and the Ugly, The (Buono, il brutto, il cattivo, Il) (1966)",
+          "genres": "Action|Adventure|Western",
+          "score": 4.5,
+          "votes": 10
+        },
+        {
+          "movieId": 4973,
+          "title": "Amelie (Fabuleux destin d'Amélie Poulain, Le) (2001)",
+          "genres": "Comedy|Romance",
+          "score": 4.5,
+          "votes": 10
+        },
+        {
+          "movieId": 8874,
+          "title": "Shaun of the Dead (2004)",
+          "genres": "Comedy|Horror",
+          "score": 4.5,
+          "votes": 10
+        },
+        {
+          "movieId": 608,
+          "title": "Fargo (1996)",
+          "genres": "Comedy|Crime|Drama|Thriller",
+          "score": 4.45,
+          "votes": 10
+        },
+        {
+          "movieId": 6711,
+          "title": "Lost in Translation (2003)",
+          "genres": "Comedy|Drama|Romance",
+          "score": 4.35,
+          "votes": 10
+        },
+        {
+          "movieId": 33166,
+          "title": "Crash (2004)",
+          "genres": "Crime|Drama",
+          "score": 4.3,
+          "votes": 10
+        }
+      ]
+    },
+    {
+      "id": 500,
+      "name": "Hélio",
+      "n_rated": 62,
+      "favorite_genres": [
+        "Adventure",
+        "Comedy",
+        "Action"
+      ],
+      "history": [
+        {
+          "movieId": 260,
+          "title": "Star Wars: Episode IV - A New Hope (1977)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "rating": 5.0
+        },
+        {
+          "movieId": 344,
+          "title": "Ace Ventura: Pet Detective (1994)",
+          "genres": "Comedy",
+          "rating": 5.0
+        },
+        {
+          "movieId": 380,
+          "title": "True Lies (1994)",
+          "genres": "Action|Adventure|Comedy|Romance|Thriller",
+          "rating": 5.0
+        },
+        {
+          "movieId": 588,
+          "title": "Aladdin (1992)",
+          "genres": "Adventure|Animation|Children|Comedy|Musical",
+          "rating": 5.0
+        },
+        {
+          "movieId": 593,
+          "title": "Silence of the Lambs, The (1991)",
+          "genres": "Crime|Horror|Thriller",
+          "rating": 5.0
+        }
+      ],
+      "als": [
+        {
+          "rank": 1,
+          "movieId": 177209,
+          "title": "Acı Aşk (2009)",
+          "genres": "Drama",
+          "score": 6.6642
+        },
+        {
+          "rank": 2,
+          "movieId": 274047,
+          "title": "The Sound of Violet (2022)",
+          "genres": "Comedy|Drama|Romance",
+          "score": 6.5953
+        },
+        {
+          "rank": 3,
+          "movieId": 270306,
+          "title": "WWE: The Triumph and Tragedy of World Class Championship Wrestling (2007)",
+          "genres": "Action|Documentary",
+          "score": 6.2108
+        },
+        {
+          "rank": 4,
+          "movieId": 240070,
+          "title": "SpongeBob SquarePants: Heroes of Bikini Bottom (2011)",
+          "genres": "Animation",
+          "score": 6.2108
+        },
+        {
+          "rank": 5,
+          "movieId": 240054,
+          "title": "SpongeBob SquarePants: Tide and Seek",
+          "genres": "Animation|Comedy",
+          "score": 6.2108
+        },
+        {
+          "rank": 6,
+          "movieId": 161119,
+          "title": "Tale About the Cat and the Moon (1997)",
+          "genres": "Animation",
+          "score": 6.1936
+        },
+        {
+          "rank": 7,
+          "movieId": 225435,
+          "title": "Wesley (2009)",
+          "genres": "(no genres listed)",
+          "score": 6.1697
+        },
+        {
+          "rank": 8,
+          "movieId": 194434,
+          "title": "Adrenaline (1990)",
+          "genres": "(no genres listed)",
+          "score": 6.127
+        },
+        {
+          "rank": 9,
+          "movieId": 222368,
+          "title": "Crazy Romance (2019)",
+          "genres": "Comedy|Romance",
+          "score": 6.1086
+        },
+        {
+          "rank": 10,
+          "movieId": 275847,
+          "title": "Beyond Words (2018)",
+          "genres": "Drama",
+          "score": 6.0196
+        }
+      ],
+      "content_based": [
+        {
+          "movieId": 112852,
+          "title": "Guardians of the Galaxy (2014)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 208,
+          "title": "Waterworld (1995)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 2275,
+          "title": "Six-String Samurai (1998)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 3702,
+          "title": "Mad Max (1979)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 3704,
+          "title": "Mad Max Beyond Thunderdome (1985)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 122918,
+          "title": "Guardians of the Galaxy 2 (2017)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 122264,
+          "title": "Knights (1993)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 173291,
+          "title": "Valerian and the City of a Thousand Planets (2017)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 200180,
+          "title": "Access Code (1984)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 228311,
+          "title": "Farewell Kamen Rider Den-O: Final Countdown (2008)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        }
+      ],
+      "knn": [
+        {
+          "movieId": 47,
+          "title": "Seven (a.k.a. Se7en) (1995)",
+          "genres": "Mystery|Thriller",
+          "score": 4.2857,
+          "votes": 14
+        },
+        {
+          "movieId": 4973,
+          "title": "Amelie (Fabuleux destin d'Amélie Poulain, Le) (2001)",
+          "genres": "Comedy|Romance",
+          "score": 4.5385,
+          "votes": 13
+        },
+        {
+          "movieId": 4993,
+          "title": "Lord of the Rings: The Fellowship of the Ring, The (2001)",
+          "genres": "Adventure|Fantasy",
+          "score": 4.5385,
+          "votes": 13
+        },
+        {
+          "movieId": 7153,
+          "title": "Lord of the Rings: The Return of the King, The (2003)",
+          "genres": "Action|Adventure|Drama|Fantasy",
+          "score": 4.3462,
+          "votes": 13
+        },
+        {
+          "movieId": 1246,
+          "title": "Dead Poets Society (1989)",
+          "genres": "Drama",
+          "score": 4.375,
+          "votes": 12
+        },
+        {
+          "movieId": 1198,
+          "title": "Raiders of the Lost Ark (Indiana Jones and the Raiders of the Lost Ark) (1981)",
+          "genres": "Action|Adventure",
+          "score": 4.9545,
+          "votes": 11
+        },
+        {
+          "movieId": 2571,
+          "title": "Matrix, The (1999)",
+          "genres": "Action|Sci-Fi|Thriller",
+          "score": 4.7273,
+          "votes": 11
+        },
+        {
+          "movieId": 2028,
+          "title": "Saving Private Ryan (1998)",
+          "genres": "Action|Drama|War",
+          "score": 4.6364,
+          "votes": 11
+        },
+        {
+          "movieId": 4226,
+          "title": "Memento (2000)",
+          "genres": "Mystery|Thriller",
+          "score": 4.5909,
+          "votes": 11
+        },
+        {
+          "movieId": 32,
+          "title": "Twelve Monkeys (a.k.a. 12 Monkeys) (1995)",
+          "genres": "Mystery|Sci-Fi|Thriller",
+          "score": 4.5455,
+          "votes": 11
+        }
+      ]
+    },
+    {
+      "id": 2000,
+      "name": "Victor",
+      "n_rated": 42,
+      "favorite_genres": [
+        "Adventure",
+        "Action",
+        "Fantasy"
+      ],
+      "history": [
+        {
+          "movieId": 2706,
+          "title": "American Pie (1999)",
+          "genres": "Comedy|Romance",
+          "rating": 5.0
+        },
+        {
+          "movieId": 4718,
+          "title": "American Pie 2 (2001)",
+          "genres": "Comedy",
+          "rating": 5.0
+        },
+        {
+          "movieId": 4896,
+          "title": "Harry Potter and the Sorcerer's Stone (a.k.a. Harry Potter and the Philosopher's Stone) (2001)",
+          "genres": "Adventure|Children|Fantasy",
+          "rating": 5.0
+        },
+        {
+          "movieId": 5816,
+          "title": "Harry Potter and the Chamber of Secrets (2002)",
+          "genres": "Adventure|Fantasy",
+          "rating": 5.0
+        },
+        {
+          "movieId": 6377,
+          "title": "Finding Nemo (2003)",
+          "genres": "Adventure|Animation|Children|Comedy",
+          "rating": 5.0
+        }
+      ],
+      "als": [
+        {
+          "rank": 1,
+          "movieId": 215031,
+          "title": "Susan's Plan (1998)",
+          "genres": "Comedy",
+          "score": 6.6052
+        },
+        {
+          "rank": 2,
+          "movieId": 203633,
+          "title": "The Bribe (2018)",
+          "genres": "Comedy|Crime",
+          "score": 6.4873
+        },
+        {
+          "rank": 3,
+          "movieId": 177209,
+          "title": "Acı Aşk (2009)",
+          "genres": "Drama",
+          "score": 6.3272
+        },
+        {
+          "rank": 4,
+          "movieId": 139140,
+          "title": "ONEDREAMRUSH (2010)",
+          "genres": "Fantasy",
+          "score": 6.3044
+        },
+        {
+          "rank": 5,
+          "movieId": 161119,
+          "title": "Tale About the Cat and the Moon (1997)",
+          "genres": "Animation",
+          "score": 6.1011
+        },
+        {
+          "rank": 6,
+          "movieId": 264554,
+          "title": "The Majestic Life of Queen Elizabeth II (2013)",
+          "genres": "Documentary",
+          "score": 6.0965
+        },
+        {
+          "rank": 7,
+          "movieId": 270306,
+          "title": "WWE: The Triumph and Tragedy of World Class Championship Wrestling (2007)",
+          "genres": "Action|Documentary",
+          "score": 6.0513
+        },
+        {
+          "rank": 8,
+          "movieId": 240070,
+          "title": "SpongeBob SquarePants: Heroes of Bikini Bottom (2011)",
+          "genres": "Animation",
+          "score": 6.0513
+        },
+        {
+          "rank": 9,
+          "movieId": 240054,
+          "title": "SpongeBob SquarePants: Tide and Seek",
+          "genres": "Animation|Comedy",
+          "score": 6.0513
+        },
+        {
+          "rank": 10,
+          "movieId": 265364,
+          "title": "One Breath Around The World (2019)",
+          "genres": "(no genres listed)",
+          "score": 5.6988
+        }
+      ],
+      "content_based": [
+        {
+          "movieId": 3,
+          "title": "Grumpier Old Men (1995)",
+          "genres": "Comedy|Romance",
+          "score": 1.0
+        },
+        {
+          "movieId": 7,
+          "title": "Sabrina (1995)",
+          "genres": "Comedy|Romance",
+          "score": 1.0
+        },
+        {
+          "movieId": 292185,
+          "title": "Nouveau départ (2023)",
+          "genres": "Comedy|Romance",
+          "score": 1.0
+        },
+        {
+          "movieId": 129,
+          "title": "Pie in the Sky (1996)",
+          "genres": "Comedy|Romance",
+          "score": 1.0
+        },
+        {
+          "movieId": 231255,
+          "title": "Still Today (2020)",
+          "genres": "Comedy|Romance",
+          "score": 1.0
+        },
+        {
+          "movieId": 231169,
+          "title": "Akhiyon Se Goli Maare (2002)",
+          "genres": "Comedy|Romance",
+          "score": 1.0
+        },
+        {
+          "movieId": 268498,
+          "title": "Where Your Heart Belongs (2022)",
+          "genres": "Comedy|Romance",
+          "score": 1.0
+        },
+        {
+          "movieId": 268494,
+          "title": "Harmony From The Heart (2022)",
+          "genres": "Comedy|Romance",
+          "score": 1.0
+        },
+        {
+          "movieId": 268482,
+          "title": "'Tis the Season to be Merry (2021)",
+          "genres": "Comedy|Romance",
+          "score": 1.0
+        },
+        {
+          "movieId": 268522,
+          "title": "Four to Dinner (2022)",
+          "genres": "Comedy|Romance",
+          "score": 1.0
+        }
+      ],
+      "knn": [
+        {
+          "movieId": 68157,
+          "title": "Inglourious Basterds (2009)",
+          "genres": "Action|Drama|War",
+          "score": 4.3462,
+          "votes": 13
+        },
+        {
+          "movieId": 109487,
+          "title": "Interstellar (2014)",
+          "genres": "Sci-Fi|IMAX",
+          "score": 4.3462,
+          "votes": 13
+        },
+        {
+          "movieId": 122916,
+          "title": "Thor: Ragnarok (2017)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 4.5,
+          "votes": 12
+        },
+        {
+          "movieId": 33794,
+          "title": "Batman Begins (2005)",
+          "genres": "Action|Crime|IMAX",
+          "score": 4.3333,
+          "votes": 12
+        },
+        {
+          "movieId": 91529,
+          "title": "Dark Knight Rises, The (2012)",
+          "genres": "Action|Adventure|Crime|IMAX",
+          "score": 4.3333,
+          "votes": 12
+        },
+        {
+          "movieId": 2959,
+          "title": "Fight Club (1999)",
+          "genres": "Action|Crime|Drama|Thriller",
+          "score": 4.25,
+          "votes": 12
+        },
+        {
+          "movieId": 260,
+          "title": "Star Wars: Episode IV - A New Hope (1977)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 4.5,
+          "votes": 11
+        },
+        {
+          "movieId": 152081,
+          "title": "Zootopia (2016)",
+          "genres": "Action|Adventure|Animation|Children|Comedy",
+          "score": 4.4545,
+          "votes": 11
+        },
+        {
+          "movieId": 49272,
+          "title": "Casino Royale (2006)",
+          "genres": "Action|Adventure|Thriller",
+          "score": 4.3636,
+          "votes": 11
+        },
+        {
+          "movieId": 44191,
+          "title": "V for Vendetta (2006)",
+          "genres": "Action|Sci-Fi|Thriller|IMAX",
+          "score": 4.3182,
+          "votes": 11
+        }
+      ]
+    },
+    {
+      "id": 5000,
+      "name": "Isabelle",
+      "n_rated": 22,
+      "favorite_genres": [
+        "Action",
+        "Drama",
+        "Adventure"
+      ],
+      "history": [
+        {
+          "movieId": 260,
+          "title": "Star Wars: Episode IV - A New Hope (1977)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "rating": 5.0
+        },
+        {
+          "movieId": 356,
+          "title": "Forrest Gump (1994)",
+          "genres": "Comedy|Drama|Romance|War",
+          "rating": 5.0
+        },
+        {
+          "movieId": 1198,
+          "title": "Raiders of the Lost Ark (Indiana Jones and the Raiders of the Lost Ark) (1981)",
+          "genres": "Action|Adventure",
+          "rating": 5.0
+        },
+        {
+          "movieId": 4993,
+          "title": "Lord of the Rings: The Fellowship of the Ring, The (2001)",
+          "genres": "Adventure|Fantasy",
+          "rating": 5.0
+        },
+        {
+          "movieId": 5952,
+          "title": "Lord of the Rings: The Two Towers, The (2002)",
+          "genres": "Adventure|Fantasy",
+          "rating": 5.0
+        }
+      ],
+      "als": [
+        {
+          "rank": 1,
+          "movieId": 270306,
+          "title": "WWE: The Triumph and Tragedy of World Class Championship Wrestling (2007)",
+          "genres": "Action|Documentary",
+          "score": 6.5987
+        },
+        {
+          "rank": 2,
+          "movieId": 240070,
+          "title": "SpongeBob SquarePants: Heroes of Bikini Bottom (2011)",
+          "genres": "Animation",
+          "score": 6.5987
+        },
+        {
+          "rank": 3,
+          "movieId": 240054,
+          "title": "SpongeBob SquarePants: Tide and Seek",
+          "genres": "Animation|Comedy",
+          "score": 6.5987
+        },
+        {
+          "rank": 4,
+          "movieId": 177209,
+          "title": "Acı Aşk (2009)",
+          "genres": "Drama",
+          "score": 6.1155
+        },
+        {
+          "rank": 5,
+          "movieId": 274047,
+          "title": "The Sound of Violet (2022)",
+          "genres": "Comedy|Drama|Romance",
+          "score": 6.0644
+        },
+        {
+          "rank": 6,
+          "movieId": 275847,
+          "title": "Beyond Words (2018)",
+          "genres": "Drama",
+          "score": 5.9003
+        },
+        {
+          "rank": 7,
+          "movieId": 194434,
+          "title": "Adrenaline (1990)",
+          "genres": "(no genres listed)",
+          "score": 5.8999
+        },
+        {
+          "rank": 8,
+          "movieId": 151989,
+          "title": "The Thorn (1971)",
+          "genres": "Comedy",
+          "score": 5.7855
+        },
+        {
+          "rank": 9,
+          "movieId": 231289,
+          "title": "LIFE BEYOND: Chapter 2. The Museum of Alien Life (2020)",
+          "genres": "Documentary",
+          "score": 5.7206
+        },
+        {
+          "rank": 10,
+          "movieId": 231287,
+          "title": "LIFE BEYOND: Chapter 1. Alien life, deep time, and our place in cosmic history (2019)",
+          "genres": "Documentary",
+          "score": 5.7206
+        }
+      ],
+      "content_based": [
+        {
+          "movieId": 112852,
+          "title": "Guardians of the Galaxy (2014)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 208,
+          "title": "Waterworld (1995)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 2275,
+          "title": "Six-String Samurai (1998)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 3702,
+          "title": "Mad Max (1979)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 3704,
+          "title": "Mad Max Beyond Thunderdome (1985)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 122918,
+          "title": "Guardians of the Galaxy 2 (2017)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 122264,
+          "title": "Knights (1993)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 173291,
+          "title": "Valerian and the City of a Thousand Planets (2017)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 200180,
+          "title": "Access Code (1984)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        },
+        {
+          "movieId": 228311,
+          "title": "Farewell Kamen Rider Den-O: Final Countdown (2008)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 1.0
+        }
+      ],
+      "knn": [
+        {
+          "movieId": 858,
+          "title": "Godfather, The (1972)",
+          "genres": "Crime|Drama",
+          "score": 4.8077,
+          "votes": 13
+        },
+        {
+          "movieId": 589,
+          "title": "Terminator 2: Judgment Day (1991)",
+          "genres": "Action|Sci-Fi",
+          "score": 4.3846,
+          "votes": 13
+        },
+        {
+          "movieId": 50,
+          "title": "Usual Suspects, The (1995)",
+          "genres": "Crime|Mystery|Thriller",
+          "score": 4.3462,
+          "votes": 13
+        },
+        {
+          "movieId": 593,
+          "title": "Silence of the Lambs, The (1991)",
+          "genres": "Crime|Horror|Thriller",
+          "score": 4.2692,
+          "votes": 13
+        },
+        {
+          "movieId": 110,
+          "title": "Braveheart (1995)",
+          "genres": "Action|Drama|War",
+          "score": 4.5417,
+          "votes": 12
+        },
+        {
+          "movieId": 1196,
+          "title": "Star Wars: Episode V - The Empire Strikes Back (1980)",
+          "genres": "Action|Adventure|Sci-Fi",
+          "score": 4.4583,
+          "votes": 12
+        },
+        {
+          "movieId": 2858,
+          "title": "American Beauty (1999)",
+          "genres": "Drama|Romance",
+          "score": 4.6818,
+          "votes": 11
+        },
+        {
+          "movieId": 1097,
+          "title": "E.T. the Extra-Terrestrial (1982)",
+          "genres": "Children|Drama|Sci-Fi",
+          "score": 4.5909,
+          "votes": 11
+        },
+        {
+          "movieId": 608,
+          "title": "Fargo (1996)",
+          "genres": "Comedy|Crime|Drama|Thriller",
+          "score": 4.4091,
+          "votes": 11
+        },
+        {
+          "movieId": 1221,
+          "title": "Godfather: Part II, The (1974)",
+          "genres": "Crime|Drama",
+          "score": 4.4091,
+          "votes": 11
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+name: CI — Sparkle Movie
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installation des dépendances
+        run: pip install -r requirements.txt
+
+      - name: Vérification que le CSV de recommandations existe
+        run: |
+          if [ ! -f data/recommendations.csv ]; then
+            echo "ERREUR : data/recommendations.csv absent."
+            echo "Exécutez python src/train_and_export.py pour générer les recommandations."
+            exit 1
+          fi
+
+      - name: Lancement des tests Pytest
+        run: pytest tests/ -v --tb=short
+
+      - name: Vérification du RMSE (Green Build)
+        run: |
+          python - <<'EOF'
+          import json, sys
+          with open("data/model_metrics.json") as f:
+              metrics = json.load(f)
+          rmse = metrics["rmse"]
+          threshold = 1.0
+          if rmse >= threshold:
+              print(f"ECHEC : RMSE={rmse:.4f} >= seuil={threshold}")
+              sys.exit(1)
+          print(f"OK : RMSE={rmse:.4f} < seuil={threshold}")
+          EOF

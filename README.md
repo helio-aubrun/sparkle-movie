@@ -1,6 +1,6 @@
 # Sparkle Movie
 
-Système de recommandation de films basé sur le dataset **MovieLens 32M**, développé avec **Apache Spark** et **PySpark MLlib**.
+Système de recommandation de films basé sur le dataset **MovieLens 32M**, développé avec **Apache Spark**, **PySpark MLlib**, et exposé via une application web complète (FastAPI + frontend SPA + Docker).
 
 ---
 
@@ -18,14 +18,26 @@ Une plateforme de streaming vidéo souhaite améliorer l'expérience utilisateur
 ```
 sparkle-movie/
 ├── data/
-│   └── download_dataset.py      # Script de téléchargement du dataset MovieLens 32M
+│   ├── download_dataset.py      # Script de téléchargement du dataset MovieLens 32M
+│   ├── recommendations.csv      # Top-10 ALS par utilisateur (2M lignes) — généré
+│   ├── model_metrics.json       # RMSE, couverture, date d'entraînement — généré
+│   └── profiles.json            # Profils des 5 utilisateurs fictifs — généré
 ├── notebooks/
 │   └── 01_exploration.ipynb     # Exploration, modélisation (ALS, Content-Based, KNN) et évaluation
-├── src/                         # Scripts Python d'entraînement et de nettoyage
-├── api/                         # API REST FastAPI
-├── tests/                       # Tests automatisés Pytest
+├── src/
+│   ├── train_and_export.py      # Entraînement ALS Spark + export CSV/JSON
+│   └── export_profiles.py       # Génération des profils fictifs (3 algos)
+├── api/
+│   ├── main.py                  # API REST FastAPI (5 endpoints)
+│   └── Dockerfile               # Image Docker de l'API
+├── frontend/
+│   ├── index.html               # SPA 3 onglets (Dashboard, Profils, Recherche)
+│   └── Dockerfile               # Image Docker nginx
+├── tests/
+│   └── test_api.py              # 14 tests Pytest
+├── docker-compose.yml           # Orchestration des 2 containers
 ├── .github/
-│   └── workflows/               # Configuration CI/CD
+│   └── workflows/ci.yml         # Pipeline CI/CD GitHub Actions
 ├── requirements.txt
 └── README.md
 ```
@@ -76,57 +88,61 @@ Algorithme natif de **Spark MLlib** qui décompose la matrice utilisateurs × fi
 - `coldStartStrategy="drop"` : ignore les IDs inconnus lors de l'évaluation
 
 **Résultats :**
-- RMSE = **0.8098** sur le jeu de test (split 80/20)
-- Couverture du catalogue = **0.93%** (ALS se concentre sur les films populaires)
+- RMSE = **0.8112** sur le jeu de test (split 80/20)
+- Couverture du catalogue = **0.91%** (ALS se concentre sur les films populaires)
 
-**Avantages :** Scalable, natif Spark, très performant sur des données denses
+**Avantages :** Scalable, natif Spark, très performant sur des données denses  
 **Limites :** Couverture faible — aveugle sur les films peu notés
 
 ---
 
-### 2. Content-Based Filtering
+### 2. Content-Based Filtering (TF-IDF + Similarité Cosinus)
 
-Crée des profils de films à partir de leurs genres, puis recommande des films similaires à ceux qu'un utilisateur a aimés.
+Recommande des films similaires à ceux qu'un utilisateur a aimés, en comparant leurs genres.
 
 **Pipeline :**
-1. One-Hot Encoding manuel des genres (20 genres uniques)
-2. **HashingTF** → conversion de la liste de genres en fréquences
-3. **IDF** → pondération de l'importance relative de chaque genre
-4. **Normalizer** → normalisation pour la similarité cosinus
-5. **Similarité cosinus** → mesure de proximité entre films via produit scalaire
+1. Nettoyage des genres (`Action|Comedy` → `Action Comedy`)
+2. **TF-IDF** (Term Frequency-Inverse Document Frequency) — vectorise les genres de chaque film
+3. **Similarité cosinus** — mesure la proximité entre le film préféré de l'utilisateur et tous les autres films
+4. Retourne les N films les plus proches non encore vus
 
-**Avantages :** Résout le cold start côté films, indépendant des notes
+**Avantages :** Résout le cold start côté films, indépendant des notes  
 **Limites :** Limité aux genres disponibles, ne découvre pas de nouveaux profils
 
 ---
 
-### 3. KNN — K-Nearest Neighbors (User-User Collaborative Filtering)
+### 3. KNN — User-User Collaborative Filtering
 
-Trouve les K utilisateurs dont le profil est le plus proche de l'utilisateur cible, puis recommande les films bien notés (≥ 4) par ces voisins.
+Trouve les utilisateurs aux goûts similaires, puis recommande les films bien notés par ces voisins.
 
-Deux implémentations comparées :
+**Pipeline :**
+1. Identification des candidats voisins (≥ 5 films en commun avec l'utilisateur cible)
+2. Construction d'une matrice pivot utilisateurs × films notés
+3. **Similarité cosinus** sur les vecteurs de notes → sélection des K=15 voisins les plus proches
+4. Recommandation des films notés ≥ 4★ par ces voisins, non encore vus par l'utilisateur
 
-| Méthode | Complexité requête | Exact ? | Implémentation |
-|---------|-------------------|---------|----------------|
-| **LSH** (BucketedRandomProjection) | O(1) approx. | ❌ | Spark MLlib natif |
-| **KD-Tree** | O(k · log n) | ✅ | scikit-learn (driver) |
-
-> Le KD-Tree est optimal avec `rank=10` (faible dimension). Au-delà de rank ≈ 50, la malédiction de la dimensionnalité dégrade l'avantage logarithmique.
-
-**Avantages :** Intuitif, exact avec KD-Tree, exploite les vecteurs latents ALS
-**Limites :** KD-Tree limité à ~1M utilisateurs, LSH approximatif
+**Avantages :** Intuitif, exploite les comportements réels des utilisateurs  
+**Limites :** Sensible aux utilisateurs rares, coûteux en mémoire à grande échelle
 
 ---
 
 ## Évaluation comparative
 
-Recommandations générées pour 5 utilisateurs fictifs (IDs : 1, 10, 500, 2000, 5000) :
+Recommandations générées pour 5 utilisateurs fictifs :
+
+| Utilisateur | ID | Genres favoris |
+|-------------|-----|---------------|
+| Akram | 1 | Drama, Comedy, Romance |
+| Giuliana | 10 | Variable selon historique |
+| Hélio | 500 | Variable selon historique |
+| Victor | 2000 | Variable selon historique |
+| Isabelle | 5000 | Variable selon historique |
 
 | Approche | Précision (RMSE) | Couverture | Points forts |
 |----------|-----------------|------------|--------------|
-| **ALS** | 0.8098 | 0.93% | Personnalisation fine sur historique riche |
+| **ALS** | 0.8112 | 0.91% | Personnalisation fine sur historique riche |
 | **Content-Based** | N/A | ~100% | Couvre les films froids, indépendant des notes |
-| **KNN (KD-Tree)** | N/A | Dépend des voisins | Exact, exploite les vecteurs ALS |
+| **KNN user-user** | N/A | Dépend des voisins | Exploite les comportements similaires |
 
 **Conclusion :** Aucune approche seule ne suffit. Un système hybride ALS + Content-Based offre la meilleure couverture du catalogue (réponse au cold start) tout en maintenant une précision élevée sur les utilisateurs actifs.
 
@@ -169,31 +185,63 @@ Le dataset MovieLens est **anonymisé** : les `userId` sont des identifiants num
 
 ---
 
-## Installation
+## Installation & Déploiement
 
 ### Prérequis
 
 - Python 3.11+
 - Java 21 (requis par PySpark)
+- Docker Desktop
 
 ```bash
 # Windows — installer Java via winget
 winget install Microsoft.OpenJDK.21
 ```
 
-### Dépendances Python
+### 1. Installer les dépendances
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Télécharger le dataset
+### 2. Télécharger le dataset
 
 ```bash
 python data/download_dataset.py
 ```
 
-### Lancer les notebooks
+### 3. Entraîner le modèle et exporter les recommandations
+
+```bash
+python src/train_and_export.py
+```
+
+Génère :
+- `data/recommendations.csv` — top-10 ALS pour chaque utilisateur (2M lignes)
+- `data/model_metrics.json` — RMSE, couverture, date d'entraînement
+
+### 4. Générer les profils fictifs
+
+```bash
+python src/export_profiles.py
+```
+
+Génère :
+- `data/profiles.json` — recommandations ALS + Content-Based + KNN pour 5 utilisateurs fictifs
+
+### 5. Lancer l'application via Docker
+
+```bash
+docker-compose up -d
+```
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3000 |
+| API REST | http://localhost:8000 |
+| Swagger UI | http://localhost:8000/docs |
+
+### 6. Lancer les notebooks
 
 ```bash
 jupyter notebook notebooks/
@@ -201,34 +249,60 @@ jupyter notebook notebooks/
 
 ---
 
-## API REST
+## Application Web
 
-L'API expose les recommandations via un endpoint REST documenté avec Swagger.
+### Frontend — SPA 3 onglets (`frontend/index.html`)
 
-### Démarrer l'API
+Servie via **nginx** sur le port 3000.
 
-```bash
-uvicorn api.main:app --reload
+| Onglet | Contenu |
+|--------|---------|
+| **Dashboard** | 5 stat cards (32M notes, 87K films, 200K users, RMSE, couverture) + tableau comparatif des 3 algorithmes + conclusion |
+| **Profils fictifs** | 5 utilisateurs (Akram, Giuliana, Hélio, Victor, Isabelle) — clic → comparaison côte à côte ALS / Content-Based / KNN + historique noté |
+| **Recherche libre** | Saisie d'un userId, slider 1–10 résultats, grille de recommandations ALS |
+
+### API REST (`api/main.py`)
+
+Construite avec **FastAPI**, servie via **uvicorn** sur le port 8000.
+
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| GET | `/health` | Statut de l'API + nb utilisateurs/recommandations |
+| GET | `/metrics` | RMSE, couverture, date d'entraînement |
+| GET | `/recommend/{user_id}?n=10` | Top-N films ALS (max 10) |
+| GET | `/profiles` | Les 5 profils fictifs complets (3 algos) |
+| GET | `/profiles/{user_id}` | Profil individuel |
+
+### Exemple de réponse
+
+```
+GET /recommend/42?n=3
 ```
 
-### Endpoint principal
-
-```
-GET /recommend/{user_id}
-```
-
-**Réponse :**
 ```json
 {
   "user_id": 42,
+  "n_recommendations": 3,
   "recommendations": [
-    { "movieId": 318, "title": "Shawshank Redemption, The (1994)", "score": 4.87 },
-    { "movieId": 858, "title": "Godfather, The (1972)", "score": 4.82 }
+    { "rank": 1, "movieId": 318, "title": "Shawshank Redemption, The (1994)", "genres": "Crime|Drama", "score": 4.87 },
+    { "rank": 2, "movieId": 858, "title": "Godfather, The (1972)", "genres": "Crime|Drama", "score": 4.82 },
+    { "rank": 3, "movieId": 527, "title": "Schindler's List (1993)", "genres": "Drama|War", "score": 4.79 }
   ]
 }
 ```
 
-Documentation Swagger disponible sur `http://localhost:8000/docs`
+---
+
+## Docker
+
+Deux containers orchestrés via **docker-compose** :
+
+| Container | Image | Port | Rôle |
+|-----------|-------|------|------|
+| `sparkle-api` | `python:3.11-slim` | 8000 | FastAPI + uvicorn |
+| `sparkle-frontend` | `nginx:alpine` | 3000 | Serveur HTTP statique |
+
+Le dossier `./data` est monté en volume dans l'API — une mise à jour de `profiles.json` ne nécessite qu'un `docker restart sparkle-api`, sans rebuild de l'image.
 
 ---
 
@@ -238,21 +312,34 @@ Documentation Swagger disponible sur `http://localhost:8000/docs`
 pytest tests/ -v
 ```
 
-Les tests couvrent :
-- Validation des types de données en entrée
-- Vérification que le RMSE reste sous le seuil défini (< 1.0)
-- Tests de l'API (statut, format de réponse)
+14 tests couvrant :
+- Santé de l'API (`/health`, `/metrics`)
+- Validité des recommandations (structure, ordre, unicité)
+- Validation des paramètres (n invalide → 422, user inconnu → 404)
+- Performance modèle (RMSE < 1.0 — Green Build)
+- Intégrité des données (pas de doublons, scores positifs)
+
+---
+
+## Intégration Continue (CI)
+
+GitHub Actions exécute automatiquement à chaque push sur `main` :
+1. Installation des dépendances
+2. Vérification de la présence du CSV de recommandations
+3. Lancement de la suite de tests Pytest
+4. Vérification que le RMSE reste sous le seuil défini
 
 ---
 
 ## Monitoring
 
-Le système de logging enregistre :
-- Les prédictions effectuées (userId, films recommandés, timestamp)
-- Les temps de réponse de l'API
+`data/model_metrics.json` est généré à chaque entraînement et expose :
+- RMSE sur le jeu de test
+- Couverture du catalogue (% de films recommandés)
+- Date et heure d'entraînement
 
 **Stratégie de détection du Data Drift :**
-La distribution des notes et la popularité des genres sont mesurées périodiquement. Un écart significatif par rapport aux statistiques d'entraînement déclenche un réentraînement du modèle.
+La distribution des notes et la popularité des genres sont mesurées périodiquement. Un écart significatif par rapport aux statistiques d'entraînement déclenche un réentraînement via `src/train_and_export.py`.
 
 ---
 

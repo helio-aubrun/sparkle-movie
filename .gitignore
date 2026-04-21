@@ -2,6 +2,10 @@
 ml-32m/
 *.zip
 
+# Fichiers générés (trop lourds pour git)
+data/recommendations.csv
+data/model_metrics.json
+
 # Fichiers générés par Spark
 derby.log
 metastore_db/

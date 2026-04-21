@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Sparkle Movie</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0f1117;--surface:#1a1d27;--surface2:#222536;
+      --border:#2a2d3a;--accent:#6c63ff;--accent2:#a78bfa;
+      --text:#e2e8f0;--muted:#64748b;--success:#22c55e;
+      --warn:#f59e0b;--danger:#ef4444;
+    }
+    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+
+    /* ── NAV ── */
+    nav{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:.75rem 2rem;gap:2rem;position:sticky;top:0;z-index:100}
+    .logo{font-size:1.2rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap}
+    .nav-tabs{display:flex;gap:.25rem;flex:1}
+    .tab-btn{background:none;border:none;color:var(--muted);padding:.5rem .9rem;border-radius:8px;cursor:pointer;font-size:.9rem;transition:all .2s}
+    .tab-btn:hover{background:var(--surface2);color:var(--text)}
+    .tab-btn.active{background:var(--accent);color:#fff}
+    .nav-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:.25rem .8rem;font-size:.78rem;color:var(--muted)}
+
+    /* ── LAYOUT ── */
+    .page{display:none;padding:2rem;max-width:1200px;margin:0 auto}
+    .page.active{display:block}
+
+    /* ── DASHBOARD ── */
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.5rem}
+    .stat-label{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem}
+    .stat-value{font-size:1.8rem;font-weight:700;color:var(--text)}
+    .stat-value.accent{color:var(--accent2)}
+    .stat-value.success{color:var(--success)}
+    .stat-value.warn{color:var(--warn)}
+    .stat-sub{font-size:.78rem;color:var(--muted);margin-top:.2rem}
+
+    .section-title{font-size:1.1rem;font-weight:600;margin-bottom:1rem;color:var(--text)}
+    .section-title span{color:var(--muted);font-weight:400;font-size:.9rem;margin-left:.5rem}
+
+    /* ── COMPARISON TABLE ── */
+    .cmp-table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:14px;overflow:hidden;border:1px solid var(--border)}
+    .cmp-table th{background:var(--surface2);padding:.9rem 1.2rem;text-align:left;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+    .cmp-table td{padding:.85rem 1.2rem;border-top:1px solid var(--border);font-size:.9rem}
+    .cmp-table tr:hover td{background:var(--surface2)}
+    .badge{display:inline-block;padding:.2rem .6rem;border-radius:6px;font-size:.75rem;font-weight:600}
+    .badge-als{background:#1e2a4a;color:#60a5fa}
+    .badge-cb{background:#1e3a2a;color:#4ade80}
+    .badge-knn{background:#3a1e2a;color:#f472b6}
+    .score-pill{background:var(--surface2);border-radius:20px;padding:.15rem .6rem;font-size:.82rem;color:var(--accent2);font-weight:600}
+
+    /* ── PROFILS ── */
+    .profiles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+    .profile-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.2rem;cursor:pointer;transition:all .2s;text-align:center}
+    .profile-card:hover,.profile-card.selected{border-color:var(--accent);background:var(--surface2)}
+    .avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;margin:0 auto .75rem}
+    .profile-name{font-size:1rem;font-weight:600;margin-bottom:.3rem}
+    .profile-meta{font-size:.78rem;color:var(--muted)}
+    .genre-chips{display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;margin-top:.6rem}
+    .genre-chip{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:.15rem .5rem;font-size:.7rem;color:var(--muted)}
+
+    /* ── RECO PANELS ── */
+    .reco-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem}
+    .reco-user-info{display:flex;align-items:center;gap:.75rem}
+    .compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+    @media(max-width:900px){.compare-grid{grid-template-columns:1fr}}
+    .algo-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1rem}
+    .algo-title{display:flex;align-items:center;gap:.5rem;margin-bottom:.8rem;font-size:.9rem;font-weight:600}
+    .algo-desc{font-size:.75rem;color:var(--muted);margin-bottom:.8rem;line-height:1.5}
+
+    .movie-item{display:flex;align-items:flex-start;gap:.6rem;padding:.55rem 0;border-bottom:1px solid var(--border)}
+    .movie-item:last-child{border-bottom:none}
+    .movie-rank{font-size:.72rem;color:var(--muted);min-width:18px;padding-top:2px}
+    .movie-info{flex:1;min-width:0}
+    .movie-title{font-size:.85rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .movie-genres{font-size:.72rem;color:var(--muted);margin-top:.15rem}
+    .movie-score{font-size:.78rem;color:var(--accent2);font-weight:600;white-space:nowrap}
+
+    /* Historique */
+    .history-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1rem;margin-bottom:1.5rem}
+    .history-title{font-size:.85rem;font-weight:600;color:var(--muted);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em}
+    .history-item{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid var(--border)}
+    .history-item:last-child{border-bottom:none}
+    .star-rating{color:var(--warn);font-size:.82rem}
+
+    /* ── RECHERCHE ── */
+    .search-bar{display:flex;gap:.75rem;max-width:520px;margin-bottom:1.5rem}
+    .search-bar input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;color:var(--text);font-size:1rem;outline:none;transition:border-color .2s}
+    .search-bar input:focus{border-color:var(--accent)}
+    .search-bar input::placeholder{color:var(--muted)}
+    .btn{background:var(--accent);border:none;border-radius:10px;padding:.75rem 1.4rem;color:#fff;font-size:.95rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+    .btn:hover{opacity:.85}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .btn-secondary{background:var(--surface2);border:1px solid var(--border);color:var(--text)}
+    .options-row{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;font-size:.88rem;color:var(--muted)}
+    .options-row input[type=range]{accent-color:var(--accent)}
+    .options-row span{color:var(--accent2);font-weight:600}
+
+    .reco-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
+    .reco-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.5rem;transition:border-color .2s,transform .15s;animation:fadeUp .3s ease both}
+    .reco-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .card-rank{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+    .card-title{font-size:.95rem;font-weight:600;line-height:1.3}
+    .card-genres{display:flex;flex-wrap:wrap;gap:.3rem}
+    .genre-tag{background:#1e1e3a;color:var(--accent2);border-radius:6px;padding:.15rem .5rem;font-size:.7rem;font-weight:500}
+    .score-bar-wrap{display:flex;align-items:center;gap:.5rem;margin-top:auto}
+    .score-bar{flex:1;height:4px;background:var(--border);border-radius:99px;overflow:hidden}
+    .score-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px}
+    .score-val{color:var(--success);font-weight:600;font-size:.8rem}
+
+    /* ── MON PROFIL ── */
+    .profile-form{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;max-width:700px}
+    .form-group{margin-bottom:1.2rem}
+    .form-label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.4rem;font-weight:500}
+    .form-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;color:var(--text);font-size:.95rem;outline:none;transition:border-color .2s}
+    .form-input:focus{border-color:var(--accent)}
+    .form-input::placeholder{color:var(--muted)}
+
+    /* Genre selector */
+    .genre-select-grid{display:flex;flex-wrap:wrap;gap:.5rem}
+    .genre-btn{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:.3rem .75rem;font-size:.8rem;color:var(--muted);cursor:pointer;transition:all .15s}
+    .genre-btn:hover{border-color:var(--accent2);color:var(--text)}
+    .genre-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+    /* Movie search autocomplete */
+    .movie-search-wrap{position:relative}
+    .autocomplete-list{position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;z-index:200;max-height:220px;overflow-y:auto;display:none}
+    .autocomplete-list.open{display:block}
+    .autocomplete-item{padding:.6rem 1rem;cursor:pointer;font-size:.88rem;border-bottom:1px solid var(--border)}
+    .autocomplete-item:last-child{border-bottom:none}
+    .autocomplete-item:hover{background:var(--surface);color:var(--accent2)}
+    .autocomplete-item .genres-hint{font-size:.75rem;color:var(--muted);margin-top:.1rem}
+
+    /* Rated movies list */
+    .rated-list{display:flex;flex-direction:column;gap:.5rem;margin-top:.75rem}
+    .rated-item{display:flex;align-items:center;gap:.75rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.6rem .9rem}
+    .rated-item-title{flex:1;font-size:.88rem;font-weight:500}
+    .rated-item-genres{font-size:.75rem;color:var(--muted)}
+    .star-picker{display:flex;gap:2px;cursor:pointer}
+    .star-picker span{font-size:1.1rem;color:var(--border);transition:color .1s}
+    .star-picker span.on{color:var(--warn)}
+    .remove-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:.1rem .3rem;border-radius:4px}
+    .remove-btn:hover{color:var(--danger)}
+
+    /* ── STATUS / EMPTY ── */
+    .status-msg{padding:.6rem 1rem;border-radius:8px;font-size:.88rem;margin-bottom:1rem}
+    .status-msg.error{background:#3b1c1c;color:#f87171}
+    .status-msg.loading{background:#1e1e3a;color:var(--accent2)}
+    .empty-state{text-align:center;padding:3rem;color:var(--muted)}
+    .empty-state .icon{font-size:2.5rem;margin-bottom:.75rem}
+
+    /* ── CONCLUSION ── */
+    .conclusion-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-top:1.5rem}
+    .conclusion-box h3{font-size:1rem;font-weight:600;margin-bottom:.75rem;color:var(--accent2)}
+    .conclusion-box p{font-size:.9rem;color:var(--muted);line-height:1.7;margin-bottom:.75rem}
+    .conclusion-box p:last-child{margin-bottom:0}
+
+    /* Avatar colors */
+    .av-1{background:linear-gradient(135deg,#6c63ff,#a78bfa)}
+    .av-2{background:linear-gradient(135deg,#22c55e,#4ade80)}
+    .av-3{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
+    .av-4{background:linear-gradient(135deg,#ef4444,#f87171)}
+    .av-5{background:linear-gradient(135deg,#06b6d4,#67e8f9)}
+    .av-custom{background:linear-gradient(135deg,#ec4899,#f97316)}
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">✦ Sparkle Movie</div>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="showTab('dashboard',this)">Dashboard</button>
+    <button class="tab-btn" onclick="showTab('profiles',this)">Profils fictifs</button>
+    <button class="tab-btn" onclick="showTab('myprofile',this)">Mon Profil</button>
+    <button class="tab-btn" onclick="showTab('search',this)">Recherche libre</button>
+  </div>
+  <div class="nav-badge">MovieLens 32M · ALS</div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     PAGE 1 — DASHBOARD
+══════════════════════════════════════════ -->
+<div id="page-dashboard" class="page active">
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-label">Notes</div><div class="stat-value accent">32M</div><div class="stat-sub">MovieLens 32M dataset</div></div>
+    <div class="stat-card"><div class="stat-label">Films</div><div class="stat-value">87 585</div><div class="stat-sub">titres uniques</div></div>
+    <div class="stat-card"><div class="stat-label">Utilisateurs</div><div class="stat-value">200 948</div><div class="stat-sub">profils actifs</div></div>
+    <div class="stat-card"><div class="stat-label">RMSE</div><div class="stat-value success" id="rmse-val">—</div><div class="stat-sub">Root Mean Square Error</div></div>
+    <div class="stat-card"><div class="stat-label">Couverture</div><div class="stat-value warn" id="cov-val">—</div><div class="stat-sub">% du catalogue couvert</div></div>
+  </div>
+
+  <div class="section-title">Comparaison des 3 approches <span>Évaluation sur MovieLens 32M</span></div>
+  <table class="cmp-table">
+    <thead><tr><th>Algorithme</th><th>Méthode</th><th>RMSE</th><th>Couverture</th><th>Cold Start films</th><th>Scalabilité</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-als">ALS</span></td>
+        <td>Collaborative Filtering — décomposition matricielle (Spark MLlib)</td>
+        <td><span class="score-pill" id="tbl-rmse">0.81</span></td>
+        <td><span style="color:var(--warn)">0.91%</span></td>
+        <td><span style="color:var(--danger)">Non résolu</span></td>
+        <td><span style="color:var(--success)">Excellente</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-cb">Content-Based</span></td>
+        <td>TF-IDF sur les genres + Similarité cosinus</td>
+        <td><span style="color:var(--muted)">N/A</span></td>
+        <td><span style="color:var(--success)">~100%</span></td>
+        <td><span style="color:var(--success)">Résolu</span></td>
+        <td><span style="color:var(--success)">Bonne</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-knn">KNN</span></td>
+        <td>User-User CF — similarité cosinus sur profils genre</td>
+        <td><span style="color:var(--muted)">N/A</span></td>
+        <td><span style="color:var(--warn)">Variable</span></td>
+        <td><span style="color:var(--warn)">Partiel</span></td>
+        <td><span style="color:var(--warn)">Raisonnable</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="conclusion-box">
+    <h3>Conclusion — Quelle approche choisir ?</h3>
+    <p><strong style="color:var(--text)">ALS</strong> est l'algorithme le plus précis (RMSE = 0.81) sur les utilisateurs actifs, mais sa couverture catalogue est limitée à 0.91% — il ne recommande que les films populaires.</p>
+    <p><strong style="color:var(--text)">Content-Based</strong> résout le problème de cold start pour les films peu notés (48% du catalogue) en se basant uniquement sur les genres. Il est indispensable en complément d'ALS.</p>
+    <p><strong style="color:var(--text)">KNN</strong> exploite les profils genre pour trouver des utilisateurs similaires. Il produit des recommandations variées et complémentaires.</p>
+    <p>→ <strong style="color:var(--accent2)">Système hybride recommandé : ALS + Content-Based</strong>, le KNN venant enrichir les profils avec des découvertes inattendues.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 2 — PROFILS FICTIFS
+══════════════════════════════════════════ -->
+<div id="page-profiles" class="page">
+  <div class="section-title">5 Utilisateurs fictifs <span>Cliquez sur un profil pour voir ses recommandations</span></div>
+  <div class="profiles-grid" id="profiles-grid">
+    <div class="empty-state"><div class="icon">⏳</div>Chargement des profils…</div>
+  </div>
+  <div id="profile-detail" style="display:none">
+    <div class="reco-header">
+      <div class="reco-user-info">
+        <div class="avatar av-1" id="detail-avatar" style="width:44px;height:44px;font-size:1.1rem"></div>
+        <div>
+          <div style="font-weight:600;font-size:1.05rem" id="detail-name"></div>
+          <div style="font-size:.8rem;color:var(--muted)" id="detail-meta"></div>
+        </div>
+      </div>
+    </div>
+    <div class="history-panel">
+      <div class="history-title">Historique — Films les mieux notés</div>
+      <div id="history-list"></div>
+    </div>
+    <div class="section-title" style="margin-bottom:1rem">Recommandations <span>Comparaison des 3 algorithmes</span></div>
+    <div class="compare-grid">
+      <div class="algo-panel">
+        <div class="algo-title"><span class="badge badge-als">ALS</span>Collaborative Filtering</div>
+        <div class="algo-desc">Basé sur les similarités de comportement entre utilisateurs.</div>
+        <div id="als-list"></div>
+      </div>
+      <div class="algo-panel">
+        <div class="algo-title"><span class="badge badge-cb">Content-Based</span>Filtrage par contenu</div>
+        <div class="algo-desc">Films similaires au préféré de l'utilisateur (TF-IDF genres + cosinus).</div>
+        <div id="cb-list"></div>
+      </div>
+      <div class="algo-panel">
+        <div class="algo-title"><span class="badge badge-knn">KNN</span>Voisins proches</div>
+        <div class="algo-desc">Films aimés par les utilisateurs aux goûts similaires.</div>
+        <div id="knn-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 3 — MON PROFIL
+══════════════════════════════════════════ -->
+<div id="page-myprofile" class="page">
+  <div class="section-title">Mon Profil <span>Obtenez des recommandations personnalisées basées sur vos goûts</span></div>
+
+  <div class="profile-form">
+    <!-- Nom -->
+    <div class="form-group">
+      <label class="form-label">Votre prénom</label>
+      <input class="form-input" id="my-name" type="text" placeholder="ex : Marie" maxlength="30"/>
+    </div>
+
+    <!-- Genres favoris -->
+    <div class="form-group">
+      <label class="form-label">Vos 3 genres favoris <span style="color:var(--muted);font-weight:400" id="genre-count-hint">(0/3 sélectionnés)</span></label>
+      <div class="genre-select-grid" id="genre-grid"></div>
+    </div>
+
+    <!-- Films notés -->
+    <div class="form-group">
+      <label class="form-label">Films que vous avez vus <span style="color:var(--muted);font-weight:400">(facultatif — notez 1 à 5 étoiles)</span></label>
+      <div class="movie-search-wrap">
+        <input class="form-input" id="movie-search-input" type="text" placeholder="Rechercher un film… (ex : Inception, Matrix…)" autocomplete="off"/>
+        <div class="autocomplete-list" id="autocomplete-list"></div>
+      </div>
+      <div class="rated-list" id="rated-list"></div>
+    </div>
+
+    <!-- Bouton -->
+    <div id="myprofile-status"></div>
+    <button class="btn" id="myprofile-btn" onclick="submitMyProfile()">Obtenir mes recommandations</button>
+  </div>
+
+  <!-- Résultats -->
+  <div id="myprofile-results" style="display:none">
+    <div class="reco-header">
+      <div class="reco-user-info">
+        <div class="avatar av-custom" style="width:44px;height:44px;font-size:1.1rem" id="my-avatar"></div>
+        <div>
+          <div style="font-weight:600;font-size:1.05rem" id="my-result-name"></div>
+          <div style="font-size:.8rem;color:var(--muted)" id="my-result-meta"></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-title" style="margin-bottom:1rem">Vos recommandations <span>Comparaison des 3 algorithmes</span></div>
+    <div class="compare-grid">
+      <div class="algo-panel">
+        <div class="algo-title"><span class="badge badge-als">ALS</span>Collaborative Filtering</div>
+        <div class="algo-desc">Recommandations de l'utilisateur existant dont le profil genre est le plus proche du vôtre.</div>
+        <div id="my-als-list"></div>
+      </div>
+      <div class="algo-panel">
+        <div class="algo-title"><span class="badge badge-cb">Content-Based</span>Filtrage par contenu</div>
+        <div class="algo-desc">Films dont les genres correspondent à vos genres favoris et aux films que vous avez aimés.</div>
+        <div id="my-cb-list"></div>
+      </div>
+      <div class="algo-panel">
+        <div class="algo-title"><span class="badge badge-knn">KNN</span>Voisins proches</div>
+        <div class="algo-desc">Films recommandés par les utilisateurs aux goûts les plus similaires aux vôtres.</div>
+        <div id="my-knn-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 4 — RECHERCHE LIBRE
+══════════════════════════════════════════ -->
+<div id="page-search" class="page">
+  <div class="section-title">Recherche libre <span>Entrez un identifiant utilisateur pour voir ses recommandations ALS</span></div>
+
+  <!-- Explication -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.5rem;max-width:700px;font-size:.88rem;color:var(--muted);line-height:1.6">
+    Le dataset MovieLens 32M contient <strong style="color:var(--text)">200 948 utilisateurs</strong> identifiés par un numéro.
+    Entrez n'importe quel ID entre 1 et 200 948 pour voir ses recommandations ALS personnalisées.
+    <br/>Vous pouvez aussi cliquer sur un <strong style="color:var(--accent2)">exemple ci-dessous</strong> pour démarrer rapidement.
+  </div>
+
+  <!-- Suggestions rapides -->
+  <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem">
+    <span style="font-size:.82rem;color:var(--muted);align-self:center">Exemples :</span>
+    <button class="genre-btn" onclick="quickSearch(1)">Akram — #1</button>
+    <button class="genre-btn" onclick="quickSearch(10)">Giuliana — #10</button>
+    <button class="genre-btn" onclick="quickSearch(500)">Hélio — #500</button>
+    <button class="genre-btn" onclick="quickSearch(2000)">Victor — #2000</button>
+    <button class="genre-btn" onclick="quickSearch(5000)">Isabelle — #5000</button>
+    <button class="genre-btn" onclick="quickSearch(Math.floor(Math.random()*200948)+1)" style="border-color:var(--accent2);color:var(--accent2)">Utilisateur aléatoire</button>
+  </div>
+
+  <!-- Barre de recherche -->
+  <div style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1.2rem;max-width:600px">
+    <div style="flex:1;min-width:180px">
+      <label style="display:block;font-size:.8rem;color:var(--muted);margin-bottom:.35rem">Identifiant utilisateur (1 – 200 948)</label>
+      <input id="uid-input" type="number" min="1" max="200948"
+        style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;color:var(--text);font-size:1rem;outline:none;transition:border-color .2s"
+        placeholder="ex : 42"/>
+    </div>
+    <div>
+      <label style="display:block;font-size:.8rem;color:var(--muted);margin-bottom:.35rem">Nombre de résultats</label>
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <input type="range" min="1" max="10" value="10"
+          oninput="document.getElementById('n-val').textContent=this.value"
+          id="n-slider" style="accent-color:var(--accent);width:100px"/>
+        <span id="n-val" style="color:var(--accent2);font-weight:600;min-width:14px">10</span>
+      </div>
+    </div>
+    <button class="btn" id="search-btn" onclick="fetchFree()">Voir les recommandations</button>
+  </div>
+
+  <div id="search-status"></div>
+
+  <!-- Résumé utilisateur -->
+  <div id="search-user-banner" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.9rem 1.2rem;margin-bottom:1.2rem;display:none;align-items:center;gap:1rem;max-width:600px">
+    <div class="avatar av-1" style="width:40px;height:40px;font-size:1rem;flex-shrink:0" id="search-avatar">#</div>
+    <div>
+      <div style="font-weight:600" id="search-user-title"></div>
+      <div style="font-size:.8rem;color:var(--muted)" id="search-user-sub"></div>
+    </div>
+  </div>
+
+  <div id="search-grid" class="reco-grid"></div>
+</div>
+
+<script>
+  const API = 'http://localhost:8000';
+  const AV_COLORS = ['av-1','av-2','av-3','av-4','av-5'];
+  let allProfiles = [];
+
+  const ALL_GENRES = [
+    'Action','Adventure','Animation','Children','Comedy','Crime',
+    'Documentary','Drama','Fantasy','Film-Noir','Horror','Musical',
+    'Mystery','Romance','Sci-Fi','Thriller','War','Western'
+  ];
+
+  let selectedGenres = [];
+  let ratedMovies    = [];   // [{movieId, title, genres, rating}]
+  let searchTimeout  = null;
+
+  // ── Navigation ──────────────────────────────────────────────────────────────
+  function showTab(tab, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + tab).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── Init ────────────────────────────────────────────────────────────────────
+  async function init() {
+    buildGenreGrid();
+    setupMovieSearch();
+    await Promise.all([loadMetrics(), loadProfiles()]);
+  }
+
+  async function loadMetrics() {
+    try {
+      const res  = await fetch(`${API}/metrics`);
+      const data = await res.json();
+      document.getElementById('rmse-val').textContent = data.rmse?.toFixed(4) ?? '—';
+      document.getElementById('cov-val').textContent  = (data.coverage_pct?.toFixed(2) ?? '—') + '%';
+      document.getElementById('tbl-rmse').textContent = data.rmse?.toFixed(4) ?? '—';
+    } catch(e) {}
+  }
+
+  async function loadProfiles() {
+    try {
+      const res  = await fetch(`${API}/profiles`);
+      const data = await res.json();
+      allProfiles = data.users || [];
+      renderProfileCards();
+    } catch(e) {
+      document.getElementById('profiles-grid').innerHTML =
+        '<div class="status-msg error">Profils indisponibles. Exécutez : python src/export_profiles.py</div>';
+    }
+  }
+
+  // ── Profils fictifs ──────────────────────────────────────────────────────────
+  function renderProfileCards() {
+    const grid = document.getElementById('profiles-grid');
+    if (!allProfiles.length) {
+      grid.innerHTML = '<div class="status-msg error">Aucun profil trouvé.</div>';
+      return;
+    }
+    grid.innerHTML = allProfiles.map((u, i) => `
+      <div class="profile-card" onclick="selectProfile(${u.id})" id="pcard-${u.id}">
+        <div class="avatar ${AV_COLORS[i]}">${u.name[0]}</div>
+        <div class="profile-name">${u.name}</div>
+        <div class="profile-meta">userId #${u.id} · ${u.n_rated.toLocaleString()} films notés</div>
+        <div class="genre-chips">${u.favorite_genres.map(g => `<span class="genre-chip">${g}</span>`).join('')}</div>
+      </div>
+    `).join('');
+  }
+
+  function selectProfile(uid) {
+    document.querySelectorAll('.profile-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('pcard-' + uid)?.classList.add('selected');
+    const u = allProfiles.find(p => p.id === uid);
+    if (!u) return;
+    renderProfileDetail(u);
+  }
+
+  function renderProfileDetail(u) {
+    const idx = allProfiles.findIndex(p => p.id === u.id);
+    document.getElementById('profile-detail').style.display = 'block';
+    const av = document.getElementById('detail-avatar');
+    av.textContent = u.name[0];
+    av.className   = `avatar ${AV_COLORS[idx]}`;
+    document.getElementById('detail-name').textContent = u.name;
+    document.getElementById('detail-meta').textContent =
+      `#${u.id} · ${u.n_rated.toLocaleString()} films notés · Genres favoris : ${u.favorite_genres.join(', ')}`;
+
+    document.getElementById('history-list').innerHTML = u.history.map(h => `
+      <div class="history-item">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.88rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.title}</div>
+          <div style="font-size:.75rem;color:var(--muted)">${h.genres}</div>
+        </div>
+        <div class="star-rating">${'★'.repeat(Math.round(h.rating))}${'☆'.repeat(5-Math.round(h.rating))}</div>
+      </div>
+    `).join('');
+
+    renderAlgoList('als-list', u.als,          'score');
+    renderAlgoList('cb-list',  u.content_based,'score');
+    renderAlgoList('knn-list', u.knn,          'score');
+    document.getElementById('profile-detail').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function renderAlgoList(containerId, items, scoreKey) {
+    const el = document.getElementById(containerId);
+    if (!items?.length) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:.82rem;padding:.5rem">Aucune recommandation disponible.</div>';
+      return;
+    }
+    el.innerHTML = items.slice(0,10).map((m, i) => `
+      <div class="movie-item">
+        <div class="movie-rank">${i+1}</div>
+        <div class="movie-info">
+          <div class="movie-title" title="${m.title}">${m.title}</div>
+          <div class="movie-genres">${m.genres?.split('|').slice(0,3).join(' · ')}</div>
+        </div>
+        <div class="movie-score">${m[scoreKey]?.toFixed(2) ?? ''}</div>
+      </div>
+    `).join('');
+  }
+
+  // ── Mon Profil — Genre grid ──────────────────────────────────────────────────
+  function buildGenreGrid() {
+    const grid = document.getElementById('genre-grid');
+    grid.innerHTML = ALL_GENRES.map(g => `
+      <button class="genre-btn" onclick="toggleGenre('${g}',this)">${g}</button>
+    `).join('');
+  }
+
+  function toggleGenre(genre, btn) {
+    if (selectedGenres.includes(genre)) {
+      selectedGenres = selectedGenres.filter(g => g !== genre);
+      btn.classList.remove('active');
+    } else {
+      if (selectedGenres.length >= 3) return;
+      selectedGenres.push(genre);
+      btn.classList.add('active');
+    }
+    document.getElementById('genre-count-hint').textContent = `(${selectedGenres.length}/3 sélectionnés)`;
+  }
+
+  // ── Mon Profil — Movie search autocomplete ───────────────────────────────────
+  function setupMovieSearch() {
+    const input = document.getElementById('movie-search-input');
+    const list  = document.getElementById('autocomplete-list');
+
+    input.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      const q = input.value.trim();
+      if (q.length < 2) { list.classList.remove('open'); return; }
+      searchTimeout = setTimeout(() => fetchMovieSuggestions(q), 300);
+    });
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.movie-search-wrap')) list.classList.remove('open');
+    });
+  }
+
+  async function fetchMovieSuggestions(q) {
+    const list = document.getElementById('autocomplete-list');
+    try {
+      const res  = await fetch(`${API}/movies/search?q=${encodeURIComponent(q)}&limit=10`);
+      const data = await res.json();
+      if (!data.length) { list.classList.remove('open'); return; }
+      list.innerHTML = data.map(m => `
+        <div class="autocomplete-item" onclick="addRatedMovie(${m.movieId},'${m.title.replace(/'/g,"\\'")}','${m.genres?.replace(/'/g,"\\'")}')">
+          <div>${m.title}</div>
+          <div class="genres-hint">${m.genres?.split('|').slice(0,3).join(' · ')}</div>
+        </div>
+      `).join('');
+      list.classList.add('open');
+    } catch(e) { list.classList.remove('open'); }
+  }
+
+  function addRatedMovie(movieId, title, genres) {
+    document.getElementById('autocomplete-list').classList.remove('open');
+    document.getElementById('movie-search-input').value = '';
+    if (ratedMovies.find(m => m.movieId === movieId)) return;
+    ratedMovies.push({movieId, title, genres, rating: 4});
+    renderRatedList();
+  }
+
+  function setMovieRating(movieId, rating) {
+    const m = ratedMovies.find(m => m.movieId === movieId);
+    if (m) { m.rating = rating; renderRatedList(); }
+  }
+
+  function removeRatedMovie(movieId) {
+    ratedMovies = ratedMovies.filter(m => m.movieId !== movieId);
+    renderRatedList();
+  }
+
+  function renderRatedList() {
+    const el = document.getElementById('rated-list');
+    if (!ratedMovies.length) { el.innerHTML = ''; return; }
+    el.innerHTML = ratedMovies.map(m => `
+      <div class="rated-item">
+        <div style="flex:1;min-width:0">
+          <div class="rated-item-title">${m.title}</div>
+          <div class="rated-item-genres">${m.genres?.split('|').slice(0,3).join(' · ')}</div>
+        </div>
+        <div class="star-picker" id="stars-${m.movieId}">
+          ${[1,2,3,4,5].map(s => `<span class="${s <= m.rating ? 'on' : ''}" onclick="setMovieRating(${m.movieId},${s})">★</span>`).join('')}
+        </div>
+        <button class="remove-btn" onclick="removeRatedMovie(${m.movieId})">✕</button>
+      </div>
+    `).join('');
+  }
+
+  // ── Mon Profil — Soumission ──────────────────────────────────────────────────
+  async function submitMyProfile() {
+    const name = document.getElementById('my-name').value.trim() || 'Vous';
+    const statusEl = document.getElementById('myprofile-status');
+    const btn      = document.getElementById('myprofile-btn');
+
+    if (selectedGenres.length === 0) {
+      statusEl.innerHTML = '<div class="status-msg error">Sélectionnez au moins 1 genre favori.</div>';
+      return;
+    }
+
+    btn.disabled = true;
+    statusEl.innerHTML = '<div class="status-msg loading">Calcul des recommandations en cours…</div>';
+    document.getElementById('myprofile-results').style.display = 'none';
+
+    try {
+      const res = await fetch(`${API}/custom-profile`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          name,
+          genres: selectedGenres,
+          ratings: ratedMovies.map(m => ({movieId: m.movieId, rating: m.rating})),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { statusEl.innerHTML = `<div class="status-msg error">${data.detail || 'Erreur API'}</div>`; return; }
+
+      statusEl.innerHTML = '';
+      document.getElementById('my-avatar').textContent = name[0].toUpperCase();
+      document.getElementById('my-result-name').textContent = name;
+      document.getElementById('my-result-meta').textContent =
+        `Genres favoris : ${selectedGenres.join(', ')} · ${ratedMovies.length} film(s) noté(s)`;
+
+      renderAlgoList('my-als-list', data.als,          'score');
+      renderAlgoList('my-cb-list',  data.content_based,'score');
+      renderAlgoList('my-knn-list', data.knn,          'score');
+
+      document.getElementById('myprofile-results').style.display = 'block';
+      document.getElementById('myprofile-results').scrollIntoView({behavior:'smooth',block:'start'});
+    } catch(e) {
+      statusEl.innerHTML = '<div class="status-msg error">Impossible de joindre l\'API.</div>';
+    } finally { btn.disabled = false; }
+  }
+
+  // ── Recherche libre ─────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('uid-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') fetchFree();
+    });
+  });
+
+  function setStatus(msg, type) {
+    const el = document.getElementById('search-status');
+    el.textContent = msg;
+    el.className   = msg ? `status-msg ${type}` : '';
+  }
+
+  function quickSearch(uid) {
+    document.getElementById('uid-input').value = uid;
+    fetchFree();
+  }
+
+  const KNOWN_NAMES = {1:'Akram', 10:'Giuliana', 500:'Hélio', 2000:'Victor', 5000:'Isabelle'};
+
+  async function fetchFree() {
+    const uid = parseInt(document.getElementById('uid-input').value);
+    const n   = document.getElementById('n-slider').value;
+    const btn = document.getElementById('search-btn');
+    if (!uid || uid < 1 || uid > 200948) {
+      setStatus('Entrez un identifiant valide entre 1 et 200 948.', 'error');
+      return;
+    }
+    btn.disabled = true;
+    setStatus('Chargement…', 'loading');
+    document.getElementById('search-grid').innerHTML = '';
+    document.getElementById('search-user-banner').style.display = 'none';
+    try {
+      const res  = await fetch(`${API}/recommend/${uid}?n=${n}`);
+      const data = await res.json();
+      if (!res.ok) {
+        setStatus(data.detail || `Utilisateur #${uid} introuvable dans le dataset.`, 'error');
+        return;
+      }
+      setStatus('', '');
+      // Afficher le banner utilisateur
+      const banner   = document.getElementById('search-user-banner');
+      const name     = KNOWN_NAMES[uid] || `Utilisateur`;
+      const initials = name[0].toUpperCase();
+      document.getElementById('search-avatar').textContent = initials;
+      document.getElementById('search-user-title').textContent = `${name} — userId #${uid}`;
+      document.getElementById('search-user-sub').textContent =
+        `${data.n_recommendations} recommandations ALS · algorithme : Alternating Least Squares (Spark MLlib)`;
+      banner.style.display = 'flex';
+      renderFreeGrid(data.recommendations);
+    } catch(e) {
+      setStatus("Impossible de joindre l'API.", 'error');
+    } finally { btn.disabled = false; }
+  }
+
+  function renderFreeGrid(recs) {
+    const grid = document.getElementById('search-grid');
+    const max  = Math.max(...recs.map(r => r.score));
+    grid.innerHTML = recs.map((r, i) => {
+      const pct    = max > 0 ? (r.score / max * 100).toFixed(1) : 0;
+      const genres = r.genres?.split('|').map(g => `<span class="genre-tag">${g}</span>`).join('') ?? '';
+      const stars  = Math.round(r.score / max * 5);
+      return `
+        <div class="reco-card" style="animation-delay:${i*35}ms">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="card-rank">Rang #${r.rank}</div>
+            <div style="font-size:.72rem;color:var(--warn)">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div>
+          </div>
+          <div class="card-title">${r.title}</div>
+          <div class="card-genres">${genres}</div>
+          <div class="score-bar-wrap">
+            <div class="score-bar"><div class="score-fill" style="width:${pct}%"></div></div>
+            <span class="score-val" title="Score ALS prédit">${r.score.toFixed(2)}</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  init();
+</script>
+</body>
+</html>
