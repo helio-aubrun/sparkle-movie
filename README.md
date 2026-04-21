@@ -19,6 +19,7 @@ Une plateforme de streaming vidéo souhaite améliorer l'expérience utilisateur
 sparkle-movie/
 ├── data/
 │   ├── download_dataset.py      # Script de téléchargement du dataset MovieLens 32M
+│   ├── movies.csv               # Catalogue 87 585 films (copie locale pour l'API)
 │   ├── recommendations.csv      # Top-10 ALS par utilisateur (2M lignes) — généré
 │   ├── model_metrics.json       # RMSE, couverture, date d'entraînement — généré
 │   └── profiles.json            # Profils des 5 utilisateurs fictifs — généré
@@ -28,13 +29,13 @@ sparkle-movie/
 │   ├── train_and_export.py      # Entraînement ALS Spark + export CSV/JSON
 │   └── export_profiles.py       # Génération des profils fictifs (3 algos)
 ├── api/
-│   ├── main.py                  # API REST FastAPI (5 endpoints)
+│   ├── main.py                  # API REST FastAPI (7 endpoints)
 │   └── Dockerfile               # Image Docker de l'API
 ├── frontend/
-│   ├── index.html               # SPA 3 onglets (Dashboard, Profils, Recherche)
+│   ├── index.html               # SPA 4 onglets (Dashboard, Profils, Mon Profil, Recherche)
 │   └── Dockerfile               # Image Docker nginx
 ├── tests/
-│   └── test_api.py              # 14 tests Pytest
+│   └── test_api.py              # Tests Pytest
 ├── docker-compose.yml           # Orchestration des 2 containers
 ├── .github/
 │   └── workflows/ci.yml         # Pipeline CI/CD GitHub Actions
@@ -81,18 +82,24 @@ python data/download_dataset.py
 
 Algorithme natif de **Spark MLlib** qui décompose la matrice utilisateurs × films en deux matrices de facteurs latents. Il prédit les notes manquantes en exploitant les similarités de comportement entre utilisateurs.
 
-**Hyperparamètres :**
-- `rank` : dimension des vecteurs de facteurs latents (défaut : 10)
-- `regParam` : régularisation pour éviter l'overfitting
-- `maxIter` : nombre d'itérations
-- `coldStartStrategy="drop"` : ignore les IDs inconnus lors de l'évaluation
+**Hyperparamètres retenus (version finale) :**
 
-**Résultats :**
-- RMSE = **0.8112** sur le jeu de test (split 80/20)
-- Couverture du catalogue = **0.91%** (ALS se concentre sur les films populaires)
+| Paramètre | Valeur | Justification |
+|-----------|--------|---------------|
+| `rank` | 20 | Dimension des vecteurs latents — 20 permet +28% de films distincts vs 10, sans saturer la RAM |
+| `regParam` | 0.1 | Régularisation — 0.3 sur-régularisait et uniformisait les vecteurs |
+| `nonnegative` | `False` | Facteurs libres (positifs et négatifs) → vraie personnalisation par profil |
+| `maxIter` | 10 | Convergence suffisante sur ce dataset |
+| `coldStartStrategy` | `drop` | Ignore les IDs inconnus lors de l'évaluation |
+| Filtre popularité | ≥ 50 notes | Élimine 71 551 films bruités dont les facteurs sont mal contraints |
 
-**Avantages :** Scalable, natif Spark, très performant sur des données denses  
-**Limites :** Couverture faible — aveugle sur les films peu notés
+**Résultats (modèle v5) :**
+- RMSE = **0.7993** sur le jeu de test (split 80/20)
+- Couverture = **3.39%** du catalogue (2 969 films distincts recommandés)
+- 200 947 utilisateurs couverts, 2 009 470 recommandations générées
+
+**Avantages :** Scalable, natif Spark, très performant sur des données denses
+**Limites :** Couverture faible — aveugle sur les films peu notés (< 50 notes)
 
 ---
 
@@ -102,12 +109,12 @@ Recommande des films similaires à ceux qu'un utilisateur a aimés, en comparant
 
 **Pipeline :**
 1. Nettoyage des genres (`Action|Comedy` → `Action Comedy`)
-2. **TF-IDF** (Term Frequency-Inverse Document Frequency) — vectorise les genres de chaque film
-3. **Similarité cosinus** — mesure la proximité entre le film préféré de l'utilisateur et tous les autres films
+2. **TF-IDF** (Term Frequency-Inverse Document Frequency) — vectorise les genres de chaque film (87 585 films indexés au démarrage de l'API)
+3. **Similarité cosinus** — mesure la proximité entre le profil de l'utilisateur et tous les films du catalogue
 4. Retourne les N films les plus proches non encore vus
 
-**Avantages :** Résout le cold start côté films, indépendant des notes  
-**Limites :** Limité aux genres disponibles, ne découvre pas de nouveaux profils
+**Avantages :** Résout le cold start côté films, indépendant des notes, couvre 100% du catalogue
+**Limites :** Limité aux genres disponibles, ne découvre pas de nouveaux profils utilisateur
 
 ---
 
@@ -121,8 +128,28 @@ Trouve les utilisateurs aux goûts similaires, puis recommande les films bien no
 3. **Similarité cosinus** sur les vecteurs de notes → sélection des K=15 voisins les plus proches
 4. Recommandation des films notés ≥ 4★ par ces voisins, non encore vus par l'utilisateur
 
-**Avantages :** Intuitif, exploite les comportements réels des utilisateurs  
+**Avantages :** Intuitif, exploite les comportements réels des utilisateurs
 **Limites :** Sensible aux utilisateurs rares, coûteux en mémoire à grande échelle
+
+---
+
+## Calibrage du modèle ALS — Historique des runs
+
+Cinq entraînements successifs ont permis d'identifier les hyperparamètres optimaux :
+
+| Run | `nonnegative` | `regParam` | `rank` | Filtre | RMSE | Films distincts | Problème |
+|-----|--------------|------------|--------|--------|------|-----------------|---------|
+| v1 | `True` | 0.1 | 10 | aucun | 0.8112 | 37 | Scores > 5.0, biais popularité extrême |
+| v2 | `True` | 0.3 | 10 | ≥ 50 | 0.9011 | 38 | Sur-régularisation → vecteurs uniformes |
+| v3 | `False` | 0.1 | 10 | ≥ 50 | 0.8003 | 2 309 | Bonne qualité, couverture limitée |
+| v4 | `False` | 0.1 | 20 | ≥ 20 | 0.7992 | 2 780 | Films de niche bruités (peu notés) |
+| **v5** | **`False`** | **0.1** | **20** | **≥ 50** | **0.7993** | **2 969** | **Optimal** ✅ |
+
+**Leçons apprises :**
+- `nonnegative=True` sur données creuses force tous les facteurs latents dans le même sens → convergence vers les mêmes films populaires pour tous les utilisateurs
+- `regParam=0.3` pousse les vecteurs vers zéro → perte de personnalisation
+- Un filtre popularité trop bas (≥ 20) introduit des films aux facteurs bruités (comédiens islandais, anime obscur) en tête de recommandations
+- `rank=20` apporte +28% de films distincts vs `rank=10` sans dégrader la qualité
 
 ---
 
@@ -130,21 +157,21 @@ Trouve les utilisateurs aux goûts similaires, puis recommande les films bien no
 
 Recommandations générées pour 5 utilisateurs fictifs :
 
-| Utilisateur | ID | Genres favoris |
-|-------------|-----|---------------|
-| Akram | 1 | Drama, Comedy, Romance |
+| Utilisateur | ID | Profil |
+|-------------|-----|--------|
+| Akram | 1 | Cinéma d'auteur classique (Drama, Film-Noir) |
 | Giuliana | 10 | Variable selon historique |
 | Hélio | 500 | Variable selon historique |
-| Victor | 2000 | Variable selon historique |
+| Victor | 2000 | Blockbusters (Action, Sci-Fi, Fantasy) |
 | Isabelle | 5000 | Variable selon historique |
 
-| Approche | Précision (RMSE) | Couverture | Points forts |
-|----------|-----------------|------------|--------------|
-| **ALS** | 0.8112 | 0.91% | Personnalisation fine sur historique riche |
-| **Content-Based** | N/A | ~100% | Couvre les films froids, indépendant des notes |
-| **KNN user-user** | N/A | Dépend des voisins | Exploite les comportements similaires |
+| Approche | RMSE | Couverture | Personnalisation | Cold Start films |
+|----------|------|------------|-----------------|-----------------|
+| **ALS** | **0.7993** | 3.39% (2 969 films) | Élevée (profils distincts) | Non résolu |
+| **Content-Based** | N/A | ~100% | Basée sur les genres | Résolu |
+| **KNN** | N/A | Variable | Films de niche | Partiel |
 
-**Conclusion :** Aucune approche seule ne suffit. Un système hybride ALS + Content-Based offre la meilleure couverture du catalogue (réponse au cold start) tout en maintenant une précision élevée sur les utilisateurs actifs.
+**Conclusion :** Un système hybride ALS + Content-Based offre la meilleure couverture du catalogue (réponse au cold start) tout en maintenant une précision élevée sur les utilisateurs actifs. Le KNN enrichit les profils avec des découvertes inattendues.
 
 ---
 
@@ -216,9 +243,11 @@ python data/download_dataset.py
 python src/train_and_export.py
 ```
 
+Durée : ~45 minutes sur machine standard (4 GB RAM alloués à Spark).
+
 Génère :
-- `data/recommendations.csv` — top-10 ALS pour chaque utilisateur (2M lignes)
-- `data/model_metrics.json` — RMSE, couverture, date d'entraînement
+- `data/recommendations.csv` — top-10 ALS pour chaque utilisateur (~2M lignes, ~150 MB)
+- `data/model_metrics.json` — RMSE, couverture, hyperparamètres, date d'entraînement
 
 ### 4. Générer les profils fictifs
 
@@ -232,12 +261,12 @@ Génère :
 ### 5. Lancer l'application via Docker
 
 ```bash
-docker-compose up -d
+docker-compose up --build -d
 ```
 
 | Service | URL |
 |---------|-----|
-| Frontend | http://localhost:3000 |
+| Frontend | http://localhost:8080 |
 | API REST | http://localhost:8000 |
 | Swagger UI | http://localhost:8000/docs |
 
@@ -251,42 +280,65 @@ jupyter notebook notebooks/
 
 ## Application Web
 
-### Frontend — SPA 3 onglets (`frontend/index.html`)
+### Frontend — SPA 4 onglets (`frontend/index.html`)
 
-Servie via **nginx** sur le port 3000.
+Servie via **nginx** sur le port 8080.
 
 | Onglet | Contenu |
 |--------|---------|
-| **Dashboard** | 5 stat cards (32M notes, 87K films, 200K users, RMSE, couverture) + tableau comparatif des 3 algorithmes + conclusion |
+| **Dashboard** | Stat cards (32M notes, 16K films populaires, 200K users, RMSE, couverture, films distincts) + tableau comparatif des 3 algorithmes avec détails hyperparamètres + conclusion |
 | **Profils fictifs** | 5 utilisateurs (Akram, Giuliana, Hélio, Victor, Isabelle) — clic → comparaison côte à côte ALS / Content-Based / KNN + historique noté |
-| **Recherche libre** | Saisie d'un userId, slider 1–10 résultats, grille de recommandations ALS |
+| **Mon Profil** | Saisie du prénom + sélection de 3 genres favoris + notation de films via autocomplétion → recommandations personnalisées via les 3 algorithmes |
+| **Recherche libre** | Saisie d'un userId, slider 1–10 résultats, suggestions de profils connus, grille de recommandations ALS |
 
 ### API REST (`api/main.py`)
 
-Construite avec **FastAPI**, servie via **uvicorn** sur le port 8000.
+Construite avec **FastAPI**, servie via **uvicorn** sur le port 8000. TF-IDF et index genre calculés au démarrage sur les 87 585 films.
 
 | Méthode | Route | Description |
 |---------|-------|-------------|
 | GET | `/health` | Statut de l'API + nb utilisateurs/recommandations |
-| GET | `/metrics` | RMSE, couverture, date d'entraînement |
-| GET | `/recommend/{user_id}?n=10` | Top-N films ALS (max 10) |
+| GET | `/metrics` | RMSE, couverture, hyperparamètres, date d'entraînement |
+| GET | `/recommend/{user_id}?n=10` | Top-N films ALS pour un utilisateur (max 10) |
 | GET | `/profiles` | Les 5 profils fictifs complets (3 algos) |
-| GET | `/profiles/{user_id}` | Profil individuel |
+| GET | `/profiles/{user_id}` | Profil individuel par userId |
+| GET | `/movies/search?q=...` | Recherche de films par titre (autocomplétion) |
+| POST | `/custom-profile` | Recommandations personnalisées pour un nouvel utilisateur |
 
-### Exemple de réponse
+### Endpoint `/custom-profile`
+
+Accepte un profil utilisateur en JSON et retourne les recommandations des 3 algorithmes :
+
+```json
+POST /custom-profile
+{
+  "name": "Marie",
+  "genres": ["Action", "Sci-Fi", "Thriller"],
+  "ratings": [
+    { "movieId": 1, "rating": 4.5 },
+    { "movieId": 296, "rating": 5.0 }
+  ]
+}
+```
+
+- **ALS proxy** : agrège les recommandations existantes par genre favori, triées par score moyen
+- **Content-Based** : similarité cosinus TF-IDF entre le profil genres + films aimés et les 87 585 films
+- **KNN proxy** : films bien notés dans les genres cibles, favorisant la diversité vs l'ALS
+
+### Exemple de réponse `/recommend`
 
 ```
-GET /recommend/42?n=3
+GET /recommend/2000?n=3
 ```
 
 ```json
 {
-  "user_id": 42,
+  "user_id": 2000,
   "n_recommendations": 3,
   "recommendations": [
-    { "rank": 1, "movieId": 318, "title": "Shawshank Redemption, The (1994)", "genres": "Crime|Drama", "score": 4.87 },
-    { "rank": 2, "movieId": 858, "title": "Godfather, The (1972)", "genres": "Crime|Drama", "score": 4.82 },
-    { "rank": 3, "movieId": 527, "title": "Schindler's List (1993)", "genres": "Drama|War", "score": 4.79 }
+    { "rank": 1, "movieId": 122914, "title": "Avengers: Infinity War - Part II (2019)", "genres": "Action|Adventure|Sci-Fi", "score": 4.6652 },
+    { "rank": 2, "movieId": 122912, "title": "Avengers: Infinity War - Part I (2018)", "genres": "Action|Adventure|Sci-Fi", "score": 4.6409 },
+    { "rank": 3, "movieId": 89745,  "title": "Avengers, The (2012)", "genres": "Action|Adventure|Sci-Fi|IMAX", "score": 4.5722 }
   ]
 }
 ```
@@ -300,9 +352,17 @@ Deux containers orchestrés via **docker-compose** :
 | Container | Image | Port | Rôle |
 |-----------|-------|------|------|
 | `sparkle-api` | `python:3.11-slim` | 8000 | FastAPI + uvicorn |
-| `sparkle-frontend` | `nginx:alpine` | 3000 | Serveur HTTP statique |
+| `sparkle-frontend` | `nginx:alpine` | 8080 | Serveur HTTP statique |
 
 Le dossier `./data` est monté en volume dans l'API — une mise à jour de `profiles.json` ne nécessite qu'un `docker restart sparkle-api`, sans rebuild de l'image.
+
+Après un réentraînement complet :
+
+```bash
+python src/train_and_export.py   # ~45 min
+python src/export_profiles.py
+docker-compose up --build -d
+```
 
 ---
 
@@ -312,7 +372,7 @@ Le dossier `./data` est monté en volume dans l'API — une mise à jour de `pro
 pytest tests/ -v
 ```
 
-14 tests couvrant :
+Tests couvrant :
 - Santé de l'API (`/health`, `/metrics`)
 - Validité des recommandations (structure, ordre, unicité)
 - Validation des paramètres (n invalide → 422, user inconnu → 404)
@@ -324,19 +384,33 @@ pytest tests/ -v
 ## Intégration Continue (CI)
 
 GitHub Actions exécute automatiquement à chaque push sur `main` :
-1. Installation des dépendances
-2. Vérification de la présence du CSV de recommandations
-3. Lancement de la suite de tests Pytest
-4. Vérification que le RMSE reste sous le seuil défini
+
+1. Vérification de la présence de tous les fichiers requis
+2. Validation syntaxique Python (`py_compile`)
+3. Création de données mock (CSV minimal + metrics JSON)
+4. Lancement de la suite de tests Pytest
+5. Vérification que le RMSE reste sous le seuil défini (< 1.0)
 
 ---
 
 ## Monitoring
 
 `data/model_metrics.json` est généré à chaque entraînement et expose :
-- RMSE sur le jeu de test
-- Couverture du catalogue (% de films recommandés)
-- Date et heure d'entraînement
+
+```json
+{
+  "rmse": 0.7993,
+  "coverage_pct": 3.39,
+  "n_users": 200947,
+  "n_movies": 87585,
+  "n_popular_films": 16034,
+  "min_ratings_filter": 50,
+  "reg_param": 0.1,
+  "rank": 20,
+  "n_recommendations": 2009470,
+  "trained_at": "2026-04-22T00:05:56.726527"
+}
+```
 
 **Stratégie de détection du Data Drift :**
 La distribution des notes et la popularité des genres sont mesurées périodiquement. Un écart significatif par rapport aux statistiques d'entraînement déclenche un réentraînement via `src/train_and_export.py`.
