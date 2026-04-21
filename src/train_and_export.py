@@ -24,7 +24,7 @@ OUTPUT_RECS     = "data/recommendations.csv"
 OUTPUT_METRICS  = "data/model_metrics.json"
 N_RECS          = 10
 RMSE_THRESHOLD  = 1.0
-MIN_RATINGS_FILM = 50   # exclure les films avec moins de 50 notes (évite les artifacts ALS)
+MIN_RATINGS_FILM = 50   # exclure les films avec moins de 50 notes
 
 # ── Session Spark ─────────────────────────────────────────────────────────────
 spark = (
@@ -65,7 +65,7 @@ als = ALS(
     userCol="userId",
     itemCol="movieId",
     ratingCol="rating",
-    rank=10,
+    rank=20,
     maxIter=10,
     regParam=0.1,
     nonnegative=False,     # facteurs négatifs autorisés → vraie personnalisation
@@ -124,6 +124,7 @@ metrics = {
     "n_popular_films":   int(n_popular),
     "min_ratings_filter": MIN_RATINGS_FILM,
     "reg_param":         0.1,
+    "rank":              20,
     "n_recommendations": len(recs_pd),
     "trained_at":        datetime.datetime.now().isoformat(),
 }
