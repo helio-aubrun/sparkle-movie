@@ -19,11 +19,12 @@ from pyspark.ml.recommendation import ALS
 from pyspark.ml.evaluation import RegressionEvaluator
 
 # ── Constantes ────────────────────────────────────────────────────────────────
-DATA_DIR       = "ml-32m"
-OUTPUT_RECS    = "data/recommendations.csv"
-OUTPUT_METRICS = "data/model_metrics.json"
-N_RECS         = 10
-RMSE_THRESHOLD = 1.0
+DATA_DIR        = "ml-32m"
+OUTPUT_RECS     = "data/recommendations.csv"
+OUTPUT_METRICS  = "data/model_metrics.json"
+N_RECS          = 10
+RMSE_THRESHOLD  = 1.0
+MIN_RATINGS_FILM = 50   # exclure les films avec moins de 50 notes (évite les artifacts ALS)
 
 # ── Session Spark ─────────────────────────────────────────────────────────────
 spark = (
@@ -51,6 +52,12 @@ df_ratings = (
 df_movies = df_movies.na.drop(subset=["movieId", "title"]).dropDuplicates(["movieId"])
 print(f"Données chargées : {df_ratings.count():,} notes — {df_movies.count():,} films.")
 
+# ── Filtre popularité : garder uniquement les films avec >= MIN_RATINGS_FILM notes ──
+film_counts = df_ratings.groupBy("movieId").count().filter(F.col("count") >= MIN_RATINGS_FILM)
+df_ratings  = df_ratings.join(film_counts.select("movieId"), on="movieId")
+n_popular   = film_counts.count()
+print(f"Filtre popularité (>= {MIN_RATINGS_FILM} notes) : {n_popular:,} films conservés — {df_ratings.count():,} notes.")
+
 # ── Entraînement ALS ──────────────────────────────────────────────────────────
 train, test = df_ratings.randomSplit([0.8, 0.2], seed=42)
 
@@ -60,7 +67,7 @@ als = ALS(
     ratingCol="rating",
     rank=10,
     maxIter=10,
-    regParam=0.1,
+    regParam=0.3,          # augmenté de 0.1 → 0.3 pour réduire l'overfitting sur films rares
     nonnegative=True,
     implicitPrefs=False,
     coldStartStrategy="drop",
@@ -92,6 +99,8 @@ recs_flat = (
         F.col("rec.movieId").alias("movieId"),
         F.col("rec.rating").alias("score"),
     )
+    # Exclure les scores > 5 (artifacts du modèle sur données sparse)
+    .filter(F.col("score") <= 5.0)
     .join(df_movies.select("movieId", "title", "genres"), on="movieId", how="left")
     .select("userId", "rank", "movieId", "title", "genres", "score")
     .orderBy("userId", "rank")
@@ -108,12 +117,15 @@ total_movies       = df_movies.count()
 coverage           = round(recommended_movies / total_movies * 100, 2)
 
 metrics = {
-    "rmse":            round(rmse, 4),
-    "coverage_pct":    coverage,
-    "n_users":         df_ratings.select("userId").distinct().count(),
-    "n_movies":        int(total_movies),
+    "rmse":              round(rmse, 4),
+    "coverage_pct":      coverage,
+    "n_users":           df_ratings.select("userId").distinct().count(),
+    "n_movies":          int(total_movies),
+    "n_popular_films":   int(n_popular),
+    "min_ratings_filter": MIN_RATINGS_FILM,
+    "reg_param":         0.3,
     "n_recommendations": len(recs_pd),
-    "trained_at":      datetime.datetime.now().isoformat(),
+    "trained_at":        datetime.datetime.now().isoformat(),
 }
 with open(OUTPUT_METRICS, "w") as f:
     json.dump(metrics, f, indent=2)
