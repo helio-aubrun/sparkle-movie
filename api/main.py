@@ -24,7 +24,8 @@ BASE_DIR      = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RECS_PATH     = os.path.join(BASE_DIR, "data", "recommendations.csv")
 METRICS_PATH  = os.path.join(BASE_DIR, "data", "model_metrics.json")
 PROFILES_PATH = os.path.join(BASE_DIR, "data", "profiles.json")
-MOVIES_PATH   = os.path.join(BASE_DIR, "data", "movies.csv")
+MOVIES_PATH          = os.path.join(BASE_DIR, "data", "movies.csv")
+MOVIES_ENRICHED_PATH = os.path.join(BASE_DIR, "data", "movies_enriched.csv")
 
 # ── Chargement des données au démarrage ───────────────────────────────────────
 def load_recommendations() -> pd.DataFrame:
@@ -45,21 +46,33 @@ def load_profiles() -> dict:
         return json.load(f)
 
 def load_movies() -> pd.DataFrame:
-    if not os.path.exists(MOVIES_PATH):
-        return pd.DataFrame(columns=["movieId", "title", "genres"])
-    df = pd.read_csv(MOVIES_PATH)
-    df["genres_clean"] = df["genres"].fillna("").str.replace("|", " ", regex=False)
+    # Préférer la version enrichie (genres + tags) si disponible
+    path = MOVIES_ENRICHED_PATH if os.path.exists(MOVIES_ENRICHED_PATH) else MOVIES_PATH
+    if not os.path.exists(path):
+        return pd.DataFrame(columns=["movieId", "title", "genres", "genres_clean", "tags_text", "features"])
+    df = pd.read_csv(path)
+    if "genres_clean" not in df.columns:
+        df["genres_clean"] = df["genres"].fillna("").str.replace("|", " ", regex=False)
+    if "tags_text" not in df.columns:
+        df["tags_text"] = ""
+    if "features" not in df.columns:
+        df["features"] = df["genres_clean"]
+    df["tags_text"] = df["tags_text"].fillna("")
+    df["features"]  = df["features"].fillna("").str.strip()
+    enriched = (df["tags_text"] != "").sum()
+    print(f"Films charges : {len(df):,} ({enriched:,} enrichis avec tags)")
     return df
 
-recs_df  = load_recommendations()
-metrics  = load_metrics()
-profiles = load_profiles()
+recs_df   = load_recommendations()
+metrics   = load_metrics()
+profiles  = load_profiles()
 movies_df = load_movies()
 
-# ── TF-IDF sur les genres (Content-Based) ─────────────────────────────────────
-tfidf     = TfidfVectorizer()
-tfidf_mat = tfidf.fit_transform(movies_df["genres_clean"]) if len(movies_df) else None
-mid_to_idx = {int(row["movieId"]): i for i, row in movies_df.iterrows()}
+# ── TF-IDF sur genres + tags (Content-Based) ──────────────────────────────────
+tfidf     = TfidfVectorizer(min_df=1, ngram_range=(1, 2))
+tfidf_mat = tfidf.fit_transform(movies_df["features"]) if len(movies_df) else None
+mid_to_idx  = {int(row["movieId"]): i for i, row in movies_df.iterrows()}
+mid_to_tags = movies_df.set_index("movieId")["tags_text"].to_dict() if "tags_text" in movies_df.columns else {}
 
 # ── Index genre par film pour les lookups rapides ─────────────────────────────
 # Pré-calculer un set de genres par movieId depuis recs_df
@@ -189,14 +202,14 @@ def custom_profile(req: CustomProfileRequest):
     # ── Content-Based ─────────────────────────────────────────────────────────
     cb_list = []
     if tfidf_mat is not None:
-        # Construire un vecteur "profil" depuis les genres favoris + films bien notés
-        liked_genres = " ".join(req.genres)
+        # Construire un vecteur "profil" depuis genres favoris + features des films aimés
+        liked_features = " ".join(req.genres)
         for r in req.ratings:
             if r.rating >= 4.0 and r.movieId in mid_to_idx:
                 idx = mid_to_idx[r.movieId]
-                liked_genres += " " + movies_df.iloc[idx]["genres_clean"]
+                liked_features += " " + movies_df.iloc[idx]["features"]
 
-        query_vec = tfidf.transform([liked_genres])
+        query_vec = tfidf.transform([liked_features])
         scores    = cosine_similarity(query_vec, tfidf_mat)[0]
 
         top_idx = np.argsort(scores)[::-1]
@@ -204,11 +217,14 @@ def custom_profile(req: CustomProfileRequest):
             row = movies_df.iloc[i]
             mid = int(row["movieId"])
             if mid not in seen_ids and scores[i] > 0:
+                tags_raw = mid_to_tags.get(mid, "")
+                top_tags = ", ".join(str(tags_raw).split()[:6]) if tags_raw else ""
                 cb_list.append({
                     "rank": len(cb_list) + 1,
                     "movieId": mid,
                     "title": row["title"],
                     "genres": row["genres"],
+                    "tags": top_tags,
                     "score": round(float(scores[i]), 4),
                 })
             if len(cb_list) >= n:

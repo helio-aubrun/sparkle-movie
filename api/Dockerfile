@@ -10,6 +10,7 @@ COPY data/recommendations.csv ./data/recommendations.csv
 COPY data/model_metrics.json  ./data/model_metrics.json
 COPY data/profiles.json       ./data/profiles.json
 COPY data/movies.csv          ./data/movies.csv
+COPY data/movies_enriched.csv ./data/movies_enriched.csv
 
 EXPOSE 8000
 
