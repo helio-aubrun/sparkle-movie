@@ -16,16 +16,25 @@ N_RECS     = 10
 
 # ── Chargement ────────────────────────────────────────────────────────────────
 print("Chargement des données...")
-movies   = pd.read_csv("ml-32m/movies.csv")
+# Préférer movies_enriched.csv (genres + tags) si disponible
+if os.path.exists("data/movies_enriched.csv"):
+    movies = pd.read_csv("data/movies_enriched.csv")
+    print("  movies_enriched.csv charge (genres + tags)")
+else:
+    movies = pd.read_csv("ml-32m/movies.csv")
+    movies["genres_clean"] = movies["genres"].fillna("").str.replace("|", " ", regex=False)
+    movies["features"] = movies["genres_clean"]
+    print("  movies.csv charge (genres seuls)")
+
 ratings  = pd.read_csv("ml-32m/ratings.csv", usecols=["userId", "movieId", "rating"])
 als_recs = pd.read_csv("data/recommendations.csv")
 print(f"  {len(movies):,} films — {len(ratings):,} notes")
 
-# ── Content-Based : TF-IDF sur les genres ─────────────────────────────────────
+# ── Content-Based : TF-IDF sur genres + tags ──────────────────────────────────
 print("Calcul TF-IDF...")
-movies["genres_clean"] = movies["genres"].fillna("").str.replace("|", " ", regex=False)
-tfidf        = TfidfVectorizer()
-tfidf_matrix = tfidf.fit_transform(movies["genres_clean"])
+movies["features"] = movies["features"].fillna("").str.strip()
+tfidf        = TfidfVectorizer(min_df=1, ngram_range=(1, 2))
+tfidf_matrix = tfidf.fit_transform(movies["features"])
 mid_to_idx   = {int(row["movieId"]): i for i, row in movies.iterrows()}
 
 def content_based_recs(fav_movie_id, seen_ids, n=N_RECS):
