@@ -202,12 +202,15 @@ def custom_profile(req: CustomProfileRequest):
     # ── Content-Based ─────────────────────────────────────────────────────────
     cb_list = []
     if tfidf_mat is not None:
-        # Construire un vecteur "profil" depuis genres favoris + features des films aimés
-        liked_features = " ".join(req.genres)
+        # Genres = indice léger (1 fois), films notés = signal principal (pondéré par note)
+        parts = [" ".join(req.genres)] if req.genres else []
         for r in req.ratings:
-            if r.rating >= 4.0 and r.movieId in mid_to_idx:
-                idx = mid_to_idx[r.movieId]
-                liked_features += " " + movies_df.iloc[idx]["features"]
+            if r.movieId in mid_to_idx:
+                idx    = mid_to_idx[r.movieId]
+                feats  = movies_df.iloc[idx]["features"]
+                weight = max(1, round(r.rating))  # répéter selon la note (1-5x)
+                parts.extend([feats] * weight)
+        liked_features = " ".join(parts) if parts else " ".join(req.genres)
 
         query_vec = tfidf.transform([liked_features])
         scores    = cosine_similarity(query_vec, tfidf_mat)[0]

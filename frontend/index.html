@@ -294,7 +294,7 @@
 
     <!-- Genres favoris -->
     <div class="form-group">
-      <label class="form-label">Vos 3 genres favoris <span style="color:var(--muted);font-weight:400" id="genre-count-hint">(0/3 sélectionnés)</span></label>
+      <label class="form-label">Genres favoris <span style="color:var(--muted);font-weight:400" id="genre-count-hint">(facultatif · 0/3 sélectionnés)</span></label>
       <div class="genre-select-grid" id="genre-grid"></div>
     </div>
 
@@ -549,7 +549,7 @@
       selectedGenres.push(genre);
       btn.classList.add('active');
     }
-    document.getElementById('genre-count-hint').textContent = `(${selectedGenres.length}/3 sélectionnés)`;
+    document.getElementById('genre-count-hint').textContent = `(facultatif · ${selectedGenres.length}/3 sélectionnés)`;
   }
 
   // ── Mon Profil — Movie search autocomplete ───────────────────────────────────
@@ -626,8 +626,8 @@
     const statusEl = document.getElementById('myprofile-status');
     const btn      = document.getElementById('myprofile-btn');
 
-    if (selectedGenres.length === 0) {
-      statusEl.innerHTML = '<div class="status-msg error">Sélectionnez au moins 1 genre favori.</div>';
+    if (selectedGenres.length === 0 && ratedMovies.length === 0) {
+      statusEl.innerHTML = '<div class="status-msg error">Sélectionnez au moins 1 genre ou notez un film.</div>';
       return;
     }
 
