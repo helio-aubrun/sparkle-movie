@@ -115,62 +115,62 @@
       ],
       "content_based": [
         {
-          "movieId": 154154,
-          "title": "Shor in the City (2011)",
+          "movieId": 184723,
+          "title": "Little Boy Blue (2017)",
           "genres": "Crime|Drama",
           "score": 1.0
         },
         {
-          "movieId": 152719,
-          "title": "Las Poquianchis (1976)",
+          "movieId": 155308,
+          "title": "Non coupable (1947)",
           "genres": "Crime|Drama",
           "score": 1.0
         },
         {
-          "movieId": 269220,
-          "title": "How I Fell in Love with a Gangster (2022)",
+          "movieId": 113010,
+          "title": "Cairo (1963)",
           "genres": "Crime|Drama",
           "score": 1.0
         },
         {
-          "movieId": 124502,
-          "title": "Have I the Right To Kill (1964)",
+          "movieId": 112959,
+          "title": "Go for Sisters (2013)",
           "genres": "Crime|Drama",
           "score": 1.0
         },
         {
-          "movieId": 110190,
-          "title": "Blondie Johnson (1933)",
+          "movieId": 31983,
+          "title": "Sicilian Clan, The (Clan des Siciliens, Le) (1969)",
           "genres": "Crime|Drama",
           "score": 1.0
         },
         {
-          "movieId": 110235,
-          "title": "Our Paradise (Notre paradis) (2011)",
+          "movieId": 170157,
+          "title": "The Avenue (2017)",
           "genres": "Crime|Drama",
           "score": 1.0
         },
         {
-          "movieId": 221192,
-          "title": "Savage Youth (2018)",
+          "movieId": 148612,
+          "title": "Desert Fury (1947)",
           "genres": "Crime|Drama",
           "score": 1.0
         },
         {
-          "movieId": 170481,
-          "title": "The Most Hated Woman in America (2017)",
+          "movieId": 244150,
+          "title": "Banksters (2020)",
           "genres": "Crime|Drama",
           "score": 1.0
         },
         {
-          "movieId": 188649,
-          "title": "My Name Ain't Johnny (2008)",
+          "movieId": 82671,
+          "title": "7 Virgins (7 vírgenes) (2005)",
           "genres": "Crime|Drama",
           "score": 1.0
         },
         {
-          "movieId": 202497,
-          "title": "Les Misérables (2019)",
+          "movieId": 170169,
+          "title": "Passport to Shame (1958)",
           "genres": "Crime|Drama",
           "score": 1.0
         }
@@ -363,64 +363,64 @@
       ],
       "content_based": [
         {
-          "movieId": 256371,
-          "title": "Therapy (2016)",
-          "genres": "Crime|Horror|Thriller",
-          "score": 1.0
+          "movieId": 63082,
+          "title": "Slumdog Millionaire (2008)",
+          "genres": "Crime|Drama|Romance",
+          "score": 0.3029
         },
         {
-          "movieId": 146054,
-          "title": "Death Valley (1982)",
-          "genres": "Crime|Horror|Thriller",
-          "score": 1.0
+          "movieId": 1937,
+          "title": "Going My Way (1944)",
+          "genres": "Comedy|Drama|Musical",
+          "score": 0.2822
         },
         {
-          "movieId": 280566,
-          "title": "Frank and Penelope (2022)",
-          "genres": "Crime|Horror|Thriller",
-          "score": 1.0
+          "movieId": 914,
+          "title": "My Fair Lady (1964)",
+          "genres": "Comedy|Drama|Musical|Romance",
+          "score": 0.2706
         },
         {
-          "movieId": 155350,
-          "title": "Where the Truth Lies (1962)",
-          "genres": "Crime|Horror|Thriller",
-          "score": 1.0
+          "movieId": 1958,
+          "title": "Terms of Endearment (1983)",
+          "genres": "Comedy|Drama",
+          "score": 0.2705
         },
         {
-          "movieId": 199490,
-          "title": "The Banker (1989)",
-          "genres": "Crime|Horror|Thriller",
-          "score": 1.0
+          "movieId": 1953,
+          "title": "French Connection, The (1971)",
+          "genres": "Action|Crime|Thriller",
+          "score": 0.2699
         },
         {
-          "movieId": 163711,
-          "title": "Haunted (2007)",
-          "genres": "Crime|Horror|Thriller",
-          "score": 1.0
+          "movieId": 1940,
+          "title": "Gentleman's Agreement (1947)",
+          "genres": "Drama",
+          "score": 0.258
         },
         {
-          "movieId": 161436,
-          "title": "The Puzzle of the Red Orchid (1962)",
-          "genres": "Crime|Horror|Thriller",
-          "score": 1.0
+          "movieId": 1933,
+          "title": "Life of Emile Zola, The (1937)",
+          "genres": "Drama",
+          "score": 0.256
         },
         {
-          "movieId": 220416,
-          "title": "Hunter's Moon (2020)",
-          "genres": "Crime|Horror|Thriller",
-          "score": 1.0
+          "movieId": 3475,
+          "title": "Place in the Sun, A (1951)",
+          "genres": "Drama|Romance",
+          "score": 0.253
         },
         {
-          "movieId": 237916,
-          "title": "Double Exposure (1982)",
-          "genres": "Crime|Horror|Thriller",
-          "score": 1.0
+          "movieId": 1935,
+          "title": "How Green Was My Valley (1941)",
+          "genres": "Drama|Musical|Romance",
+          "score": 0.2506
         },
         {
-          "movieId": 4645,
-          "title": "Cure (1997)",
-          "genres": "Crime|Horror|Thriller",
-          "score": 1.0
+          "movieId": 1287,
+          "title": "Ben-Hur (1959)",
+          "genres": "Action|Adventure|Drama",
+          "score": 0.249
         }
       ],
       "knn": [
@@ -611,64 +611,64 @@
       ],
       "content_based": [
         {
-          "movieId": 112852,
-          "title": "Guardians of the Galaxy (2014)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 3745,
+          "title": "Titan A.E. (2000)",
+          "genres": "Action|Adventure|Animation|Children|Sci-Fi",
+          "score": 0.2377
         },
         {
-          "movieId": 208,
-          "title": "Waterworld (1995)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 109487,
+          "title": "Interstellar (2014)",
+          "genres": "Sci-Fi|IMAX",
+          "score": 0.2261
         },
         {
-          "movieId": 2275,
-          "title": "Six-String Samurai (1998)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 7153,
+          "title": "Lord of the Rings: The Return of the King, The (2003)",
+          "genres": "Action|Adventure|Drama|Fantasy",
+          "score": 0.2244
         },
         {
-          "movieId": 3702,
-          "title": "Mad Max (1979)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 1200,
+          "title": "Aliens (1986)",
+          "genres": "Action|Adventure|Horror|Sci-Fi",
+          "score": 0.2222
         },
         {
-          "movieId": 3704,
-          "title": "Mad Max Beyond Thunderdome (1985)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 65796,
+          "title": "Galaxy Express 999 (Ginga tetsudô Three-Nine) (1979)",
+          "genres": "Adventure|Animation|Fantasy|Sci-Fi",
+          "score": 0.2196
         },
         {
-          "movieId": 122918,
-          "title": "Guardians of the Galaxy 2 (2017)",
+          "movieId": 135569,
+          "title": "Star Trek Beyond (2016)",
           "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "score": 0.2179
         },
         {
-          "movieId": 122264,
-          "title": "Knights (1993)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 1214,
+          "title": "Alien (1979)",
+          "genres": "Horror|Sci-Fi",
+          "score": 0.2161
         },
         {
-          "movieId": 173291,
-          "title": "Valerian and the City of a Thousand Planets (2017)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 129836,
+          "title": "The Voyage Across the Impossible (1904)",
+          "genres": "Adventure|Fantasy|Sci-Fi",
+          "score": 0.2155
         },
         {
-          "movieId": 200180,
-          "title": "Access Code (1984)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 1527,
+          "title": "Fifth Element, The (1997)",
+          "genres": "Action|Adventure|Comedy|Sci-Fi",
+          "score": 0.2153
         },
         {
-          "movieId": 228311,
-          "title": "Farewell Kamen Rider Den-O: Final Countdown (2008)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 2571,
+          "title": "Matrix, The (1999)",
+          "genres": "Action|Sci-Fi|Thriller",
+          "score": 0.2128
         }
       ],
       "knn": [
@@ -859,64 +859,64 @@
       ],
       "content_based": [
         {
-          "movieId": 3,
-          "title": "Grumpier Old Men (1995)",
-          "genres": "Comedy|Romance",
-          "score": 1.0
+          "movieId": 3617,
+          "title": "Road Trip (2000)",
+          "genres": "Comedy",
+          "score": 0.2906
         },
         {
-          "movieId": 7,
-          "title": "Sabrina (1995)",
-          "genres": "Comedy|Romance",
-          "score": 1.0
+          "movieId": 126548,
+          "title": "The DUFF (2015)",
+          "genres": "Comedy",
+          "score": 0.2755
         },
         {
-          "movieId": 292185,
-          "title": "Nouveau départ (2023)",
-          "genres": "Comedy|Romance",
-          "score": 1.0
+          "movieId": 2979,
+          "title": "Body Shots (1999)",
+          "genres": "Drama",
+          "score": 0.2711
         },
         {
-          "movieId": 129,
-          "title": "Pie in the Sky (1996)",
-          "genres": "Comedy|Romance",
-          "score": 1.0
+          "movieId": 189567,
+          "title": "Alex Strangelove (2018)",
+          "genres": "Comedy",
+          "score": 0.26
         },
         {
-          "movieId": 231255,
-          "title": "Still Today (2020)",
+          "movieId": 5151,
+          "title": "40 Days and 40 Nights (2002)",
           "genres": "Comedy|Romance",
-          "score": 1.0
+          "score": 0.2401
         },
         {
-          "movieId": 231169,
-          "title": "Akhiyon Se Goli Maare (2002)",
-          "genres": "Comedy|Romance",
-          "score": 1.0
+          "movieId": 34800,
+          "title": "Private Resort (1985)",
+          "genres": "Comedy",
+          "score": 0.2244
         },
         {
-          "movieId": 268498,
-          "title": "Where Your Heart Belongs (2022)",
-          "genres": "Comedy|Romance",
-          "score": 1.0
+          "movieId": 6875,
+          "title": "Dopamine (2003)",
+          "genres": "Comedy|Drama|Romance",
+          "score": 0.2233
         },
         {
-          "movieId": 268494,
-          "title": "Harmony From The Heart (2022)",
-          "genres": "Comedy|Romance",
-          "score": 1.0
+          "movieId": 6334,
+          "title": "Blue Car (2002)",
+          "genres": "Drama",
+          "score": 0.2215
         },
         {
-          "movieId": 268482,
-          "title": "'Tis the Season to be Merry (2021)",
-          "genres": "Comedy|Romance",
-          "score": 1.0
+          "movieId": 4974,
+          "title": "Not Another Teen Movie (2001)",
+          "genres": "Comedy",
+          "score": 0.2203
         },
         {
-          "movieId": 268522,
-          "title": "Four to Dinner (2022)",
-          "genres": "Comedy|Romance",
-          "score": 1.0
+          "movieId": 27309,
+          "title": "Restless (Levottomat) (2000)",
+          "genres": "Drama|Romance",
+          "score": 0.2194
         }
       ],
       "knn": [
@@ -1107,64 +1107,64 @@
       ],
       "content_based": [
         {
-          "movieId": 112852,
-          "title": "Guardians of the Galaxy (2014)",
+          "movieId": 1196,
+          "title": "Star Wars: Episode V - The Empire Strikes Back (1980)",
           "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "score": 0.3328
         },
         {
-          "movieId": 208,
-          "title": "Waterworld (1995)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 3745,
+          "title": "Titan A.E. (2000)",
+          "genres": "Action|Adventure|Animation|Children|Sci-Fi",
+          "score": 0.2377
         },
         {
-          "movieId": 2275,
-          "title": "Six-String Samurai (1998)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 109487,
+          "title": "Interstellar (2014)",
+          "genres": "Sci-Fi|IMAX",
+          "score": 0.2261
         },
         {
-          "movieId": 3702,
-          "title": "Mad Max (1979)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 1200,
+          "title": "Aliens (1986)",
+          "genres": "Action|Adventure|Horror|Sci-Fi",
+          "score": 0.2222
         },
         {
-          "movieId": 3704,
-          "title": "Mad Max Beyond Thunderdome (1985)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 65796,
+          "title": "Galaxy Express 999 (Ginga tetsudô Three-Nine) (1979)",
+          "genres": "Adventure|Animation|Fantasy|Sci-Fi",
+          "score": 0.2196
         },
         {
-          "movieId": 122918,
-          "title": "Guardians of the Galaxy 2 (2017)",
+          "movieId": 135569,
+          "title": "Star Trek Beyond (2016)",
           "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "score": 0.2179
         },
         {
-          "movieId": 122264,
-          "title": "Knights (1993)",
+          "movieId": 33493,
+          "title": "Star Wars: Episode III - Revenge of the Sith (2005)",
           "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "score": 0.2177
         },
         {
-          "movieId": 173291,
-          "title": "Valerian and the City of a Thousand Planets (2017)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 1214,
+          "title": "Alien (1979)",
+          "genres": "Horror|Sci-Fi",
+          "score": 0.2161
         },
         {
-          "movieId": 200180,
-          "title": "Access Code (1984)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 129836,
+          "title": "The Voyage Across the Impossible (1904)",
+          "genres": "Adventure|Fantasy|Sci-Fi",
+          "score": 0.2155
         },
         {
-          "movieId": 228311,
-          "title": "Farewell Kamen Rider Den-O: Final Countdown (2008)",
-          "genres": "Action|Adventure|Sci-Fi",
-          "score": 1.0
+          "movieId": 1527,
+          "title": "Fifth Element, The (1997)",
+          "genres": "Action|Adventure|Comedy|Sci-Fi",
+          "score": 0.2153
         }
       ],
       "knn": [

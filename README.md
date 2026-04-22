@@ -20,13 +20,15 @@ sparkle-movie/
 ├── data/
 │   ├── download_dataset.py      # Script de téléchargement du dataset MovieLens 32M
 │   ├── movies.csv               # Catalogue 87 585 films (copie locale pour l'API)
-│   ├── recommendations.csv      # Top-10 ALS par utilisateur (2M lignes) — généré
-│   ├── model_metrics.json       # RMSE, couverture, date d'entraînement — généré
+│   ├── movies_enriched.csv      # Catalogue enrichi avec tags utilisateurs — généré
+│   ├── recommendations.csv      # Top-10 ALS par utilisateur (~2M lignes) — généré
+│   ├── model_metrics.json       # RMSE, couverture, hyperparamètres — généré
 │   └── profiles.json            # Profils des 5 utilisateurs fictifs — généré
 ├── notebooks/
 │   └── 01_exploration.ipynb     # Exploration, modélisation (ALS, Content-Based, KNN) et évaluation
 ├── src/
 │   ├── train_and_export.py      # Entraînement ALS Spark + export CSV/JSON
+│   ├── export_movie_features.py # Agrégation des tags MovieLens → movies_enriched.csv
 │   └── export_profiles.py       # Génération des profils fictifs (3 algos)
 ├── api/
 │   ├── main.py                  # API REST FastAPI (7 endpoints)
@@ -53,6 +55,8 @@ sparkle-movie/
 |---------|---------|--------|
 | `ratings.csv` | Notes utilisateurs (userId, movieId, rating, timestamp) | 32 000 204 lignes |
 | `movies.csv` | Métadonnées des films (movieId, title, genres) | 87 585 films |
+| `tags.csv` | Tags libres posés par les utilisateurs sur les films | 2 000 072 lignes |
+| `links.csv` | Correspondances movieId ↔ IMDb / TMDB | 87 585 films |
 
 Les données ne sont pas versionnées dans ce repository. Pour télécharger le dataset :
 
@@ -105,16 +109,24 @@ Algorithme natif de **Spark MLlib** qui décompose la matrice utilisateurs × fi
 
 ### 2. Content-Based Filtering (TF-IDF + Similarité Cosinus)
 
-Recommande des films similaires à ceux qu'un utilisateur a aimés, en comparant leurs genres.
+Recommande des films similaires au profil d'un utilisateur, en comparant leurs genres **et leurs tags**.
 
 **Pipeline :**
 1. Nettoyage des genres (`Action|Comedy` → `Action Comedy`)
-2. **TF-IDF** (Term Frequency-Inverse Document Frequency) — vectorise les genres de chaque film (87 585 films indexés au démarrage de l'API)
-3. **Similarité cosinus** — mesure la proximité entre le profil de l'utilisateur et tous les films du catalogue
-4. Retourne les N films les plus proches non encore vus
+2. Agrégation des tags utilisateurs par film (`src/export_movie_features.py`) — tags apparaissant ≥ 3 fois conservés
+3. Construction de `features = genres + tags` pour chaque film
+4. **TF-IDF** avec bigrammes — vectorise les features de 87 585 films au démarrage de l'API
+5. Construction du vecteur profil utilisateur : genres favoris (1 fois) + features des films notés (répétées selon la note : un 5★ compte 5×, un 2★ compte 2×)
+6. **Similarité cosinus** — score de proximité entre le profil et chaque film du catalogue
+7. Retourne les N films les plus proches non encore vus
+
+**Enrichissement par les tags :**
+- 2 000 072 tags bruts → 10 032 films enrichis (11.5% du catalogue)
+- Exemples : *The Matrix* → "cyberpunk mindfuck bullet time dystopia thought-provoking virtual reality"
+- Résultat : fan de Matrix + Sci-Fi → Terminator, Blade Runner, Dark City (au lieu de films génériques)
 
 **Avantages :** Résout le cold start côté films, indépendant des notes, couvre 100% du catalogue
-**Limites :** Limité aux genres disponibles, ne découvre pas de nouveaux profils utilisateur
+**Limites :** Signal limité aux genres/tags disponibles, ne découvre pas de nouveaux profils utilisateur
 
 ---
 
@@ -146,9 +158,9 @@ Cinq entraînements successifs ont permis d'identifier les hyperparamètres opti
 | **v5** | **`False`** | **0.1** | **20** | **≥ 50** | **0.7993** | **2 969** | **Optimal** ✅ |
 
 **Leçons apprises :**
-- `nonnegative=True` sur données creuses force tous les facteurs latents dans le même sens → convergence vers les mêmes films populaires pour tous les utilisateurs
+- `nonnegative=True` sur données creuses force tous les facteurs latents dans le même sens → convergence vers les mêmes 37-38 films populaires pour tous les utilisateurs
 - `regParam=0.3` pousse les vecteurs vers zéro → perte de personnalisation
-- Un filtre popularité trop bas (≥ 20) introduit des films aux facteurs bruités (comédiens islandais, anime obscur) en tête de recommandations
+- Un filtre popularité trop bas (≥ 20) introduit des films aux facteurs bruités (anime obscur, comédiens inconnus) en tête de recommandations
 - `rank=20` apporte +28% de films distincts vs `rank=10` sans dégrader la qualité
 
 ---
@@ -168,10 +180,10 @@ Recommandations générées pour 5 utilisateurs fictifs :
 | Approche | RMSE | Couverture | Personnalisation | Cold Start films |
 |----------|------|------------|-----------------|-----------------|
 | **ALS** | **0.7993** | 3.39% (2 969 films) | Élevée (profils distincts) | Non résolu |
-| **Content-Based** | N/A | ~100% | Basée sur les genres | Résolu |
+| **Content-Based** | N/A | ~100% | Basée sur genres + tags | Résolu |
 | **KNN** | N/A | Variable | Films de niche | Partiel |
 
-**Conclusion :** Un système hybride ALS + Content-Based offre la meilleure couverture du catalogue (réponse au cold start) tout en maintenant une précision élevée sur les utilisateurs actifs. Le KNN enrichit les profils avec des découvertes inattendues.
+**Conclusion :** Un système hybride ALS + Content-Based offre la meilleure couverture du catalogue tout en maintenant une précision élevée sur les utilisateurs actifs. Le KNN enrichit les profils avec des découvertes inattendues.
 
 ---
 
@@ -237,7 +249,16 @@ pip install -r requirements.txt
 python data/download_dataset.py
 ```
 
-### 3. Entraîner le modèle et exporter les recommandations
+### 3. Générer le catalogue enrichi (genres + tags)
+
+```bash
+python src/export_movie_features.py
+```
+
+Génère :
+- `data/movies_enriched.csv` — 87 585 films avec genres + tags agrégés (10 032 enrichis)
+
+### 4. Entraîner le modèle et exporter les recommandations
 
 ```bash
 python src/train_and_export.py
@@ -249,16 +270,16 @@ Génère :
 - `data/recommendations.csv` — top-10 ALS pour chaque utilisateur (~2M lignes, ~150 MB)
 - `data/model_metrics.json` — RMSE, couverture, hyperparamètres, date d'entraînement
 
-### 4. Générer les profils fictifs
+### 5. Générer les profils fictifs
 
 ```bash
 python src/export_profiles.py
 ```
 
 Génère :
-- `data/profiles.json` — recommandations ALS + Content-Based + KNN pour 5 utilisateurs fictifs
+- `data/profiles.json` — recommandations ALS + Content-Based (genres+tags) + KNN pour 5 utilisateurs fictifs
 
-### 5. Lancer l'application via Docker
+### 6. Lancer l'application via Docker
 
 ```bash
 docker-compose up --build -d
@@ -266,11 +287,11 @@ docker-compose up --build -d
 
 | Service | URL |
 |---------|-----|
-| Frontend | http://localhost:8080 |
+| Frontend | http://localhost:3000 |
 | API REST | http://localhost:8000 |
 | Swagger UI | http://localhost:8000/docs |
 
-### 6. Lancer les notebooks
+### 7. Lancer les notebooks
 
 ```bash
 jupyter notebook notebooks/
@@ -282,18 +303,20 @@ jupyter notebook notebooks/
 
 ### Frontend — SPA 4 onglets (`frontend/index.html`)
 
-Servie via **nginx** sur le port 8080.
+Servie via **nginx** sur le port 3000.
 
 | Onglet | Contenu |
 |--------|---------|
-| **Dashboard** | Stat cards (32M notes, 16K films populaires, 200K users, RMSE, couverture, films distincts) + tableau comparatif des 3 algorithmes avec détails hyperparamètres + conclusion |
+| **Dashboard** | Stat cards dynamiques (RMSE, couverture, films distincts, films populaires) + tableau comparatif des 3 algorithmes avec détails hyperparamètres + conclusion |
 | **Profils fictifs** | 5 utilisateurs (Akram, Giuliana, Hélio, Victor, Isabelle) — clic → comparaison côte à côte ALS / Content-Based / KNN + historique noté |
-| **Mon Profil** | Saisie du prénom + sélection de 3 genres favoris + notation de films via autocomplétion → recommandations personnalisées via les 3 algorithmes |
-| **Recherche libre** | Saisie d'un userId, slider 1–10 résultats, suggestions de profils connus, grille de recommandations ALS |
+| **Mon Profil** | Prénom + genres favoris (facultatif, max 3) + notation de films via autocomplétion → recommandations personnalisées via les 3 algorithmes |
+| **Recherche libre** | Saisie d'un userId, slider 1–10 résultats, suggestions de profils connus, grille de recommandations ALS avec score prédit |
+
+**Score affiché en violet :** prédiction personnalisée du modèle (0–5 pour ALS/KNN, similarité cosinus 0–1 pour Content-Based). Ce n'est pas la note moyenne IMDb mais une estimation de combien l'utilisateur apprécierait ce film.
 
 ### API REST (`api/main.py`)
 
-Construite avec **FastAPI**, servie via **uvicorn** sur le port 8000. TF-IDF et index genre calculés au démarrage sur les 87 585 films.
+Construite avec **FastAPI**, servie via **uvicorn** sur le port 8000. TF-IDF (genres + tags) et index calculés au démarrage sur les 87 585 films.
 
 | Méthode | Route | Description |
 |---------|-------|-------------|
@@ -307,23 +330,27 @@ Construite avec **FastAPI**, servie via **uvicorn** sur le port 8000. TF-IDF et 
 
 ### Endpoint `/custom-profile`
 
-Accepte un profil utilisateur en JSON et retourne les recommandations des 3 algorithmes :
+Accepte un profil utilisateur en JSON et retourne les recommandations des 3 algorithmes. Les genres sont **facultatifs** — les films notés suffisent à générer des recommandations.
 
 ```json
 POST /custom-profile
 {
   "name": "Marie",
-  "genres": ["Action", "Sci-Fi", "Thriller"],
+  "genres": ["Sci-Fi", "Thriller"],
   "ratings": [
-    { "movieId": 1, "rating": 4.5 },
-    { "movieId": 296, "rating": 5.0 }
+    { "movieId": 2571, "rating": 5.0 }
   ]
 }
 ```
 
-- **ALS proxy** : agrège les recommandations existantes par genre favori, triées par score moyen
-- **Content-Based** : similarité cosinus TF-IDF entre le profil genres + films aimés et les 87 585 films
-- **KNN proxy** : films bien notés dans les genres cibles, favorisant la diversité vs l'ALS
+**Pondération du vecteur profil Content-Based :**
+- Genres favoris : ajoutés **1 fois** (signal léger)
+- Films notés : features répétées selon la note (5★ → 5×, 2★ → 2×) → les films aimés dominent le profil
+
+**Algorithmes retournés :**
+- **ALS proxy** : agrège les recommandations existantes par genre, triées par score moyen et nombre de votes
+- **Content-Based** : similarité cosinus TF-IDF (genres + tags) entre le profil et les 87 585 films
+- **KNN proxy** : films bien notés dans les genres cibles, diversifié par rapport à l'ALS
 
 ### Exemple de réponse `/recommend`
 
@@ -352,15 +379,16 @@ Deux containers orchestrés via **docker-compose** :
 | Container | Image | Port | Rôle |
 |-----------|-------|------|------|
 | `sparkle-api` | `python:3.11-slim` | 8000 | FastAPI + uvicorn |
-| `sparkle-frontend` | `nginx:alpine` | 8080 | Serveur HTTP statique |
+| `sparkle-frontend` | `nginx:alpine` | 3000 | Serveur HTTP statique |
 
 Le dossier `./data` est monté en volume dans l'API — une mise à jour de `profiles.json` ne nécessite qu'un `docker restart sparkle-api`, sans rebuild de l'image.
 
 Après un réentraînement complet :
 
 ```bash
-python src/train_and_export.py   # ~45 min
-python src/export_profiles.py
+python src/export_movie_features.py  # rapide (~1 min)
+python src/train_and_export.py       # ~45 min
+python src/export_profiles.py        # ~5 min
 docker-compose up --build -d
 ```
 
@@ -412,6 +440,8 @@ GitHub Actions exécute automatiquement à chaque push sur `main` :
 }
 ```
 
+Ces métriques sont chargées dynamiquement par le dashboard à chaque ouverture de l'application.
+
 **Stratégie de détection du Data Drift :**
 La distribution des notes et la popularité des genres sont mesurées périodiquement. Un écart significatif par rapport aux statistiques d'entraînement déclenche un réentraînement via `src/train_and_export.py`.
 
@@ -422,4 +452,6 @@ La distribution des notes et la popularité des genres sont mesurées périodiqu
 - [MovieLens Dataset — GroupLens](https://grouplens.org/datasets/movielens/)
 - [Apache Spark MLlib — ALS](https://spark.apache.org/docs/latest/ml-collaborative-filtering.html)
 - [PySpark Documentation](https://spark.apache.org/docs/latest/api/python/)
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [scikit-learn TF-IDF](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html)
 - Harper, F. M., & Konstan, J. A. (2015). *The MovieLens Datasets: History and Context.* ACM TIIS.
